@@ -1,0 +1,268 @@
+"use server";
+
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { requisicionSchema, RequisicionInput } from "@/schemas/requisicion.schema";
+import { revalidatePath } from "next/cache";
+import type { EstadoRequisicion } from "@prisma/client";
+
+/**
+ * Genera el siguiente número correlativo atómico en formato REQ-YYYY-NNNN
+ * usando la tabla correlativos_anuales de forma segura.
+ */
+async function generarSiguienteCorrelativo(): Promise<string> {
+  const anioActual = new Date().getFullYear();
+
+  return await db.$transaction(async (tx) => {
+    // Upsert atómico del contador anual
+    const correlativo = await tx.correlativoAnual.upsert({
+      where: { anio: anioActual },
+      update: { ultimo: { increment: 1 } },
+      create: { anio: anioActual, ultimo: 1 },
+    });
+
+    const correlativoFormateado = String(correlativo.ultimo).padStart(4, "0");
+    return `REQ-${anioActual}-${correlativoFormateado}`;
+  });
+}
+
+/**
+ * Obtener lista de requisiciones del usuario autenticado (o de su departamento / todas según rol)
+ */
+export async function getMisRequisiciones() {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("No autenticado");
+  }
+
+  const userId = parseInt(session.user.id, 10);
+
+  // Por requerimiento básico del solicitante: obtiene sus requisiciones
+  return await db.requisicion.findMany({
+    where: {
+      solicitanteId: userId,
+    },
+    include: {
+      items: true,
+      departamento: true,
+      solicitante: {
+        select: { nombre: true, usuario: true },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
+
+/**
+ * Crear requisición (Borrador o Enviada directamente a Aprobación)
+ */
+export async function crearRequisicion(
+  data: RequisicionInput,
+  enviarDirectamente: boolean = false
+) {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: "No autenticado" };
+  }
+
+  const parseResult = requisicionSchema.safeParse(data);
+  if (!parseResult.success) {
+    return {
+      success: false,
+      error: parseResult.error.issues[0]?.message || "Datos inválidos",
+    };
+  }
+
+  const validData = parseResult.data;
+  const userId = parseInt(session.user.id, 10);
+  const deptoId = session.user.departamentoId;
+
+  try {
+    const nuevaRequisicion = await db.$transaction(async (tx) => {
+      let numero: string | null = null;
+      let estado: EstadoRequisicion = "BORRADOR";
+      let fechaEnvio: Date | null = null;
+
+      if (enviarDirectamente) {
+        numero = await generarSiguienteCorrelativo();
+        estado = "PENDIENTE_APROBACION";
+        fechaEnvio = new Date();
+      }
+
+      const req = await tx.requisicion.create({
+        data: {
+          numero,
+          solicitanteId: userId,
+          departamentoId: deptoId,
+          tipo: validData.tipo,
+          prioridad: validData.prioridad,
+          fechaRequerida: new Date(validData.fechaRequerida),
+          justificacion: validData.justificacion,
+          estado,
+          fechaEnvio,
+          items: {
+            create: validData.items.map((item) => ({
+              descripcion: item.descripcion,
+              cantidad: item.cantidad,
+              unidad: item.unidad,
+              costoEstimado: item.costoEstimado ? item.costoEstimado : null,
+            })),
+          },
+        },
+      });
+
+      // Registrar historial inicial
+      await tx.historial.create({
+        data: {
+          requisicionId: req.id,
+          estadoAnterior: null,
+          estadoNuevo: estado,
+          usuarioId: userId,
+          comentario: enviarDirectamente
+            ? "Requisición creada y enviada a aprobación"
+            : "Requisición guardada como borrador",
+        },
+      });
+
+      return req;
+    });
+
+    revalidatePath("/dashboard");
+    return { success: true, requisicion: nuevaRequisicion };
+  } catch (error: unknown) {
+    console.error("Error al crear requisición:", error);
+    return { success: false, error: "Error al registrar la requisición" };
+  }
+}
+
+/**
+ * Enviar requisición que estaba en BORRADOR a Aprobación (RF-09)
+ */
+export async function enviarRequisicion(requisicionId: number) {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: "No autenticado" };
+  }
+
+  const userId = parseInt(session.user.id, 10);
+
+  try {
+    const requisicion = await db.requisicion.findUnique({
+      where: { id: requisicionId },
+      include: { items: true },
+    });
+
+    if (!requisicion) {
+      return { success: false, error: "Requisición no encontrada" };
+    }
+
+    if (requisicion.solicitanteId !== userId) {
+      return { success: false, error: "No tienes permiso sobre esta requisición" };
+    }
+
+    if (requisicion.estado !== "BORRADOR" && requisicion.estado !== "DEVUELTA") {
+      return {
+        success: false,
+        error: "Solo se pueden enviar requisiciones en borrador o devueltas",
+      };
+    }
+
+    if (requisicion.items.length === 0) {
+      return {
+        success: false,
+        error: "La requisición debe tener al menos un artículo",
+      };
+    }
+
+    await db.$transaction(async (tx) => {
+      // Si aún no tiene número, se genera correlativo
+      let numero = requisicion.numero;
+      if (!numero) {
+        numero = await generarSiguienteCorrelativo();
+      }
+
+      await tx.requisicion.update({
+        where: { id: requisicionId },
+        data: {
+          numero,
+          estado: "PENDIENTE_APROBACION",
+          fechaEnvio: new Date(),
+        },
+      });
+
+      await tx.historial.create({
+        data: {
+          requisicionId,
+          estadoAnterior: requisicion.estado,
+          estadoNuevo: "PENDIENTE_APROBACION",
+          usuarioId: userId,
+          comentario: "Enviada a aprobación por el solicitante",
+        },
+      });
+    });
+
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Error al enviar requisición:", error);
+    return { success: false, error: "Error al enviar la requisición" };
+  }
+}
+
+/**
+ * Cancelar requisición (RF-10)
+ */
+export async function cancelarRequisicion(requisicionId: number, motivo: string = "") {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: "No autenticado" };
+  }
+
+  const userId = parseInt(session.user.id, 10);
+
+  try {
+    const requisicion = await db.requisicion.findUnique({
+      where: { id: requisicionId },
+    });
+
+    if (!requisicion) {
+      return { success: false, error: "Requisición no encontrada" };
+    }
+
+    if (requisicion.solicitanteId !== userId && session.user.rol !== "ADMINISTRADOR") {
+      return { success: false, error: "No tienes permiso para cancelar esta requisición" };
+    }
+
+    if (requisicion.estado === "APROBADA" || requisicion.estado === "EN_COMPRA" || requisicion.estado === "ATENDIDA") {
+      return {
+        success: false,
+        error: "No se puede cancelar una requisición que ya ha sido aprobada o atendida",
+      };
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.requisicion.update({
+        where: { id: requisicionId },
+        data: { estado: "CANCELADA" },
+      });
+
+      await tx.historial.create({
+        data: {
+          requisicionId,
+          estadoAnterior: requisicion.estado,
+          estadoNuevo: "CANCELADA",
+          usuarioId: userId,
+          comentario: motivo ? `Cancelada por el usuario: ${motivo}` : "Cancelada por el solicitante",
+        },
+      });
+    });
+
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Error al cancelar requisición:", error);
+    return { success: false, error: "Error al cancelar la requisición" };
+  }
+}

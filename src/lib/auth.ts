@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/schemas/auth.schema";
+import type { Rol } from "@prisma/client";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
@@ -83,7 +84,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.usuario = (token.usuario as string) ?? "";
         session.user.nombre = (token.nombre as string) ?? "";
         session.user.correo = (token.correo as string) ?? "";
-        session.user.rol = token.rol as any;
+        session.user.rol = token.rol as Rol;
         session.user.departamentoId = (token.departamentoId as number) ?? 0;
         session.user.departamentoNombre = (token.departamentoNombre as string) ?? "";
       }
