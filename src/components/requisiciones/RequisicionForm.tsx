@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm, useFieldArray, useWatch } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	requisicionSchema,
@@ -29,9 +29,66 @@ import {
 	PackagePlus,
 	Building2,
 	Calendar,
-	Flame,
 	HelpCircle,
 } from 'lucide-react';
+import { parseMontoBs, formatMontoBs } from '@/utils/currency';
+
+function CostoEstimadoInput({
+	value,
+	onChange,
+}: {
+	value: number | null | undefined;
+	onChange: (val: number | null) => void;
+}) {
+	const [texto, setTexto] = useState(() => {
+		if (value !== null && value !== undefined && !isNaN(value)) {
+			return formatMontoBs(value);
+		}
+		return '';
+	});
+	const [prevValue, setPrevValue] = useState(value);
+
+	if (prevValue !== value) {
+		setPrevValue(value);
+		if (value === null || value === undefined) {
+			setTexto('');
+		}
+	}
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const raw = e.target.value;
+		setTexto(raw);
+		const parsed = parseMontoBs(raw);
+		onChange(parsed);
+	};
+
+	const handleBlur = () => {
+		if (!texto.trim()) {
+			setTexto('');
+			onChange(null);
+			return;
+		}
+		const parsed = parseMontoBs(texto);
+		if (parsed !== null) {
+			// Si el usuario escribió "Bs" o "bs", mantener el prefijo "Bs. "
+			const teniaBs = /bs/i.test(texto);
+			setTexto(formatMontoBs(parsed, teniaBs));
+			onChange(parsed);
+		}
+	};
+
+	return (
+		<Input
+			type="text"
+			inputMode="decimal"
+			placeholder="ej. 2.000,00"
+			value={texto}
+			onChange={handleChange}
+			onBlur={handleBlur}
+			className="h-9 text-xs bg-white dark:bg-zinc-800 rounded-lg border-slate-200 dark:border-zinc-700 focus-visible:ring-[#301996]/20 focus-visible:border-[#301996] text-right font-mono"
+		/>
+	);
+}
 
 interface RequisicionFormDialogProps {
 	departamentoNombre: string;
@@ -132,7 +189,7 @@ export function RequisicionForm({
 						<Input
 							value={departamentoNombre}
 							disabled
-							className="h-10 bg-white/80 dark:bg-zinc-800/80 font-medium text-xs text-slate-600 dark:text-slate-300 cursor-not-allowed rounded-xl border-slate-200 dark:border-zinc-700"
+							className="h-11 bg-white/80 dark:bg-zinc-800/80 font-medium text-xs sm:text-sm text-slate-600 dark:text-slate-300 cursor-not-allowed rounded-xl border-slate-200 dark:border-zinc-700 px-3.5"
 						/>
 						<p className="text-[10px] text-slate-400">
 							Asignado automáticamente
@@ -150,12 +207,12 @@ export function RequisicionForm({
 								if (val) form.setValue('tipo', val as 'BIEN' | 'SERVICIO');
 							}}
 						>
-							<SelectTrigger className="h-10 bg-white dark:bg-zinc-800 text-xs rounded-xl border-slate-200 dark:border-zinc-700 focus:ring-[#301996]/20">
+							<SelectTrigger className="h-11 bg-white dark:bg-zinc-800 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700 focus:ring-[#301996]/20 px-3.5">
 								<SelectValue placeholder="Seleccionar tipo" />
 							</SelectTrigger>
-							<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
-								<SelectItem value="BIEN">Bien (Material/Artículo)</SelectItem>
-								<SelectItem value="SERVICIO">Servicio Técnico</SelectItem>
+							<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 min-w-52">
+								<SelectItem value="BIEN">Bien</SelectItem>
+								<SelectItem value="SERVICIO">Servicio</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -168,19 +225,16 @@ export function RequisicionForm({
 						<Select
 							defaultValue={form.getValues('prioridad')}
 							onValueChange={(val) => {
-								if (val) form.setValue('prioridad', val as 'NORMAL' | 'URGENTE');
+								if (val)
+									form.setValue('prioridad', val as 'NORMAL' | 'URGENTE');
 							}}
 						>
-							<SelectTrigger className="h-10 bg-white dark:bg-zinc-800 text-xs rounded-xl border-slate-200 dark:border-zinc-700 focus:ring-[#301996]/20">
+							<SelectTrigger className="h-11 bg-white dark:bg-zinc-800 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700 focus:ring-[#301996]/20 px-3.5">
 								<SelectValue placeholder="Prioridad" />
 							</SelectTrigger>
-							<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
+							<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 min-w-52">
 								<SelectItem value="NORMAL">Normal</SelectItem>
-								<SelectItem value="URGENTE">
-									<span className="text-red-600 font-bold flex items-center gap-1">
-										<Flame className="w-3.5 h-3.5 inline" /> Urgente
-									</span>
-								</SelectItem>
+								<SelectItem value="URGENTE">Urgente</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -195,7 +249,7 @@ export function RequisicionForm({
 							type="date"
 							min={hoy}
 							{...form.register('fechaRequerida')}
-							className="h-10 bg-white dark:bg-zinc-800 text-xs rounded-xl border-slate-200 dark:border-zinc-700 focus-visible:ring-[#301996]/20 focus-visible:border-[#301996]"
+							className="h-11 bg-white dark:bg-zinc-800 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700 focus-visible:ring-[#301996]/20 focus-visible:border-[#301996] px-3.5"
 						/>
 						{form.formState.errors.fechaRequerida && (
 							<p className="text-[11px] text-red-500 font-medium">
@@ -211,7 +265,7 @@ export function RequisicionForm({
 						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
 							Justificación o Motivo del Requerimiento *
 						</Label>
-						<span className="text-[10px] text-slate-400">
+						<span className="text-xs text-slate-400">
 							Detalla el destino o necesidad
 						</span>
 					</div>
@@ -256,7 +310,7 @@ export function RequisicionForm({
 						}
 						className="text-xs h-8 px-3 rounded-xl gap-1.5 border-slate-200 dark:border-zinc-700 hover:border-[#301996] hover:text-[#301996] transition-colors"
 					>
-						<Plus className="w-3.5 h-3.5" /> Agregar Fila
+						<Plus className="w-3.5 h-3.5" /> Agregar item
 					</Button>
 				</div>
 
@@ -329,15 +383,15 @@ export function RequisicionForm({
 
 							{/* Costo Estimado */}
 							<div className="col-span-10 sm:col-span-2 space-y-1">
-								<Input
-									type="number"
-									step="0.01"
-									placeholder="0.00"
-									{...form.register(`items.${index}.costoEstimado`, {
-										setValueAs: (v) =>
-											v === '' || isNaN(v) ? null : parseFloat(v),
-									})}
-									className="h-9 text-xs bg-white dark:bg-zinc-800 rounded-lg border-slate-200 dark:border-zinc-700 focus-visible:ring-[#301996]/20 focus-visible:border-[#301996] text-right font-mono"
+								<Controller
+									control={form.control}
+									name={`items.${index}.costoEstimado`}
+									render={({ field }) => (
+										<CostoEstimadoInput
+											value={field.value}
+											onChange={field.onChange}
+										/>
+									)}
 								/>
 							</div>
 
@@ -371,7 +425,7 @@ export function RequisicionForm({
 							Total Estimado:
 						</span>
 						<span className="text-sm sm:text-base font-bold font-mono text-[#301996] dark:text-[#6a9bcc]">
-							Bs. {totalEstimado.toFixed(2)}
+							{formatMontoBs(totalEstimado, true)}
 						</span>
 					</div>
 				</div>

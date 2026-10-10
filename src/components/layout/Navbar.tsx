@@ -65,8 +65,7 @@ export function Navbar({ user }: NavbarProps) {
 						<div
 							className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-sm shadow-[#301996]/25 group-hover:scale-105 transition-transform shrink-0"
 							style={{
-								background:
-									'linear-gradient(135deg, #301996 0%, #2563eb 100%)',
+								background: 'linear-gradient(135deg, #301996 0%, #2563eb 100%)',
 							}}
 						>
 							{/* Ícono de Estrella Geométrica AdaptaPro */}
@@ -170,7 +169,7 @@ export function Navbar({ user }: NavbarProps) {
 				<div className="flex items-center gap-3 sm:gap-4">
 					<div className="flex items-center gap-2.5 bg-slate-50 dark:bg-zinc-900/80 px-2.5 py-1.5 rounded-xl border border-slate-200/60 dark:border-zinc-800">
 						{/* Avatar con iniciales */}
-						<div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#301996] to-[#4f46e5] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+						<div className="w-8 h-8 rounded-lg bg-linear-to-br from-[#301996] to-[#4f46e5] text-white flex items-center justify-center font-bold text-xs shadow-xs">
 							{getInitials(user.nombre)}
 						</div>
 

@@ -42,6 +42,7 @@ import {
 	Loader2,
 } from 'lucide-react';
 import type { RequisicionConRelaciones } from '@/types/requisicion';
+import { formatMontoBs } from '@/utils/currency';
 
 interface RequisicionesListProps {
 	requisiciones: RequisicionConRelaciones[];
@@ -131,7 +132,7 @@ export function RequisicionesList({ requisiciones }: RequisicionesListProps) {
 						value={filtroEstado}
 						onValueChange={(val) => setFiltroEstado(val || 'TODOS')}
 					>
-						<SelectTrigger className="h-10 min-w-44 text-xs font-medium bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus:ring-[#301996]/20">
+						<SelectTrigger className="h-10.5 min-w-50 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus:ring-[#301996]/20 px-3.5">
 							<SelectValue placeholder="Todos los estados" />
 						</SelectTrigger>
 						<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
@@ -485,11 +486,11 @@ export function RequisicionesList({ requisiciones }: RequisicionesListProps) {
 															{item.unidad}
 														</td>
 														<td className="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400 font-mono">
-															{cost > 0 ? `Bs. ${cost.toFixed(2)}` : '-'}
+															{cost > 0 ? formatMontoBs(cost, true) : '-'}
 														</td>
 														<td className="py-2.5 px-3 text-right text-slate-800 dark:text-slate-200 font-mono font-semibold">
 															{subtotal > 0
-																? `Bs. ${subtotal.toFixed(2)}`
+																? formatMontoBs(subtotal, true)
 																: '-'}
 														</td>
 													</tr>
@@ -507,7 +508,7 @@ export function RequisicionesList({ requisiciones }: RequisicionesListProps) {
 												Total Estimado:
 											</span>
 											<span className="text-sm font-bold font-mono text-[#301996] dark:text-[#6a9bcc]">
-												Bs. {totalEstimadoModal.toFixed(2)}
+												{formatMontoBs(totalEstimadoModal, true)}
 											</span>
 										</div>
 									</div>
