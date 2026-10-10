@@ -1,13 +1,150 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Rol {
+  SOLICITANTE
+  APROBADOR
+  COMPRAS
+  ADMINISTRADOR
+}
+
+enum TipoRequisicion {
+  BIEN
+  SERVICIO
+}
+
+enum Prioridad {
+  NORMAL
+  URGENTE
+}
+
+enum EstadoRequisicion {
+  BORRADOR
+  PENDIENTE_APROBACION
+  DEVUELTA
+  RECHAZADA
+  APROBADA
+  EN_COMPRA
+  ATENDIDA
+  CANCELADA
+}
+
+model Departamento {
+  id            Int            @id @default(autoincrement())
+  nombre        String         @unique @db.VarChar(100)
+  activo        Boolean        @default(true)
+  usuarios      Usuario[]
+  requisiciones Requisicion[]
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@map("departamentos")
+}
+
+model Usuario {
+  id             Int            @id @default(autoincrement())
+  usuario        String         @unique @db.VarChar(50)
+  password       String         @db.VarChar(255)
+  nombre         String         @db.VarChar(150)
+  correo         String         @unique @db.VarChar(150)
+  rol            Rol            @default(SOLICITANTE)
+  activo         Boolean        @default(true)
+  departamentoId Int            @map("departamento_id")
+  departamento   Departamento   @relation(fields: [departamentoId], references: [id])
+  requisiciones  Requisicion[]  @relation("SolicitanteRequisiciones")
+  historiales    Historial[]
+  notificaciones Notificacion[]
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  @@map("usuarios")
+}
+
+model Requisicion {
+  id             Int               @id @default(autoincrement())
+  numero         String?           @unique @db.VarChar(20) // Nulo en borrador, asignado al enviar (ej: REQ-2026-0001)
+  solicitanteId  Int               @map("solicitante_id")
+  solicitante    Usuario           @relation("SolicitanteRequisiciones", fields: [solicitanteId], references: [id])
+  departamentoId Int               @map("departamento_id")
+  departamento   Departamento      @relation(fields: [departamentoId], references: [id])
+  tipo           TipoRequisicion
+  prioridad      Prioridad         @default(NORMAL)
+  fechaRequerida DateTime          @map("fecha_requerida") @db.Date
+  justificacion  String            @db.Text
+  estado         EstadoRequisicion @default(BORRADOR)
+  fechaEnvio     DateTime?         @map("fecha_envio")
+
+  items          RequisicionItem[]
+  historial      Historial[]
+  comprasDatos   ComprasDatos?
+  notificaciones Notificacion[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("requisiciones")
+}
+
+model RequisicionItem {
+  id            Int         @id @default(autoincrement())
+  requisicionId Int         @map("requisicion_id")
+  requisicion   Requisicion @relation(fields: [requisicionId], references: [id], onDelete: Cascade)
+  descripcion   String      @db.VarChar(255)
+  cantidad      Decimal     @db.Decimal(10, 2)
+  unidad        String      @db.VarChar(30)
+  costoEstimado Decimal?    @map("costo_estimado") @db.Decimal(14, 2)
+
+  @@map("requisicion_items")
+}
+
+model Historial {
+  id             Int                @id @default(autoincrement())
+  requisicionId  Int                @map("requisicion_id")
+  requisicion    Requisicion        @relation(fields: [requisicionId], references: [id], onDelete: Restrict)
+  estadoAnterior EstadoRequisicion? @map("estado_anterior")
+  estadoNuevo    EstadoRequisicion  @map("estado_nuevo")
+  usuarioId      Int                @map("usuario_id")
+  usuario        Usuario            @relation(fields: [usuarioId], references: [id])
+  comentario     String?            @db.Text
+  fecha          DateTime           @default(now())
+
+  @@map("historial_estados")
+}
+
+model ComprasDatos {
+  id                   Int         @id @default(autoincrement())
+  requisicionId        Int         @unique @map("requisicion_id")
+  requisicion          Requisicion @relation(fields: [requisicionId], references: [id], onDelete: Cascade)
+  proveedor            String      @db.VarChar(150)
+  numeroOrdenCompra    String      @map("numero_orden_compra") @db.VarChar(50)
+  costoFinal           Decimal     @map("costo_final") @db.Decimal(14, 2)
+  fechaEntregaEstimada DateTime?   @map("fecha_entrega_estimada") @db.Date
+  createdAt            DateTime    @default(now()) @map("created_at")
+
+  @@map("compras_datos")
+}
+
+model Notificacion {
+  id            Int          @id @default(autoincrement())
+  usuarioId     Int          @map("usuario_id")
+  usuario       Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  requisicionId Int?         @map("requisicion_id")
+  requisicion   Requisicion? @relation(fields: [requisicionId], references: [id], onDelete: SetNull)
+  mensaje       String       @db.VarChar(255)
+  leida         Boolean      @default(false)
+  fecha         DateTime     @default(now())
+
+  @@map("notificaciones")
+}
+
+model CorrelativoAnual {
+  anio   Int @id
+  ultimo Int @default(0)
+
+  @@map("correlativos_anuales")
 }
