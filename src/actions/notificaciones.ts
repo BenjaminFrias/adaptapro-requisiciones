@@ -156,6 +156,32 @@ export async function getRequisicionParaModal(requisicionId: number) {
       return { success: false, error: "Requisición no encontrada", requisicion: null };
     }
 
+    const userId = parseInt(session.user.id, 10);
+    const userRole = session.user.rol;
+    const userDeptoId = session.user.departamentoId;
+
+    // Validación de permisos de acceso (RBAC + Propiedad):
+    // 1. El solicitante dueño de la requisición
+    // 2. Aprobador del departamento correspondiente
+    // 3. Compras (para requisiciones aprobadas o en trámite)
+    // 4. Administrador del sistema
+    const isOwner = requisicion.solicitanteId === userId;
+    const isApproverOfDepto =
+      (userRole === "APROBADOR" || userRole === "ADMINISTRADOR") &&
+      requisicion.departamentoId === userDeptoId;
+    const isCompras =
+      userRole === "COMPRAS" &&
+      ["APROBADA", "EN_COMPRA", "ATENDIDA"].includes(requisicion.estado);
+    const isAdmin = userRole === "ADMINISTRADOR";
+
+    if (!isOwner && !isApproverOfDepto && !isCompras && !isAdmin) {
+      return {
+        success: false,
+        error: "No tienes permiso para ver esta requisición",
+        requisicion: null,
+      };
+    }
+
     return {
       success: true,
       requisicion: JSON.parse(JSON.stringify(requisicion)),
