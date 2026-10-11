@@ -36,7 +36,6 @@ import {
   CheckSquare,
   AlertCircle,
   Loader2,
-  Package,
 } from "lucide-react";
 import type { RequisicionConRelaciones } from "@/types/requisicion";
 import { formatMontoBs } from "@/utils/currency";
