@@ -7,19 +7,17 @@ import {
 	LogOut,
 	Building2,
 	Search,
-	Bell,
 	ChevronDown,
 	Menu,
 	X,
 	Sparkles,
-	CheckCircle2,
-	Clock,
 	KeyRound,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { CambiarPasswordModal } from './CambiarPasswordModal';
+import { NotificationDropdown } from './NotificationDropdown';
 
 interface NavbarProps {
 	user: {
@@ -38,13 +36,11 @@ export function Navbar({ user }: NavbarProps) {
 	// Dropdowns and dialog states
 	const [isProfileOpen, setIsProfileOpen] = useState(false);
 	const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 
 	const profileRef = useRef<HTMLDivElement>(null);
-	const notificationsRef = useRef<HTMLDivElement>(null);
 	const searchModalRef = useRef<HTMLDivElement>(null);
 
 	// Cerrar dropdowns al hacer clic afuera
@@ -55,12 +51,6 @@ export function Navbar({ user }: NavbarProps) {
 				!profileRef.current.contains(e.target as Node)
 			) {
 				setIsProfileOpen(false);
-			}
-			if (
-				notificationsRef.current &&
-				!notificationsRef.current.contains(e.target as Node)
-			) {
-				setIsNotificationsOpen(false);
 			}
 			if (
 				searchModalRef.current &&
@@ -84,7 +74,6 @@ export function Navbar({ user }: NavbarProps) {
 			if (e.key === 'Escape') {
 				setIsSearchOpen(false);
 				setIsProfileOpen(false);
-				setIsNotificationsOpen(false);
 				setIsMobileMenuOpen(false);
 			}
 		};
@@ -221,83 +210,8 @@ export function Navbar({ user }: NavbarProps) {
 								<Search className="w-4 h-4" />
 							</button>
 
-							{/* Botón de Notificaciones con Popover */}
-							<div className="relative" ref={notificationsRef}>
-								<button
-									onClick={() => setIsNotificationsOpen((prev) => !prev)}
-									className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors relative cursor-pointer"
-									title="Notificaciones del sistema"
-									aria-label="Notificaciones"
-								>
-									<Bell className="w-4 h-4" />
-									<span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-900" />
-								</button>
-
-								{/* Menú de Notificaciones */}
-								{isNotificationsOpen && (
-									<div className="absolute right-0 mt-3 w-80 sm:w-88 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-slate-200/80 dark:border-zinc-800 p-4 z-50 animate-in fade-in-0 zoom-in-95 duration-150">
-										<div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800">
-											<div className="flex items-center gap-2">
-												<span className="text-xs font-bold text-slate-900 dark:text-white">
-													Notificaciones
-												</span>
-												<span className="text-[10px] bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-semibold px-2 py-0.5 rounded-full">
-													2 nuevas
-												</span>
-											</div>
-											<span className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer">
-												Marcar leídas
-											</span>
-										</div>
-
-										<div className="space-y-2.5 pt-3">
-											<div className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors text-left cursor-pointer">
-												<div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-													<CheckCircle2 className="w-4 h-4" />
-												</div>
-												<div className="space-y-0.5 min-w-0">
-													<p className="text-xs font-medium text-slate-800 dark:text-slate-200">
-														Requisición Aprobada
-													</p>
-													<p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
-														REQ-2026-004 ha sido aprobada por Dirección.
-													</p>
-													<span className="text-[10px] text-slate-400">
-														Hace 15 min
-													</span>
-												</div>
-											</div>
-
-											<div className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors text-left cursor-pointer">
-												<div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-													<Clock className="w-4 h-4" />
-												</div>
-												<div className="space-y-0.5 min-w-0">
-													<p className="text-xs font-medium text-slate-800 dark:text-slate-200">
-														Pendiente de cotización
-													</p>
-													<p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
-														REQ-2026-003 en proceso en departamento de Compras.
-													</p>
-													<span className="text-[10px] text-slate-400">
-														Hace 1 hora
-													</span>
-												</div>
-											</div>
-										</div>
-
-										<div className="pt-3 mt-1 border-t border-slate-100 dark:border-zinc-800 text-center">
-											<Link
-												href="/dashboard"
-												onClick={() => setIsNotificationsOpen(false)}
-												className="text-xs text-[#301996] dark:text-blue-400 font-semibold hover:underline"
-											>
-												Ver todas las solicitudes
-											</Link>
-										</div>
-									</div>
-								)}
-							</div>
+							{/* Componente Modular de Notificaciones */}
+							<NotificationDropdown />
 
 							{/* Perfil del Usuario con Avatar Circular y Dropdown */}
 							<div className="relative" ref={profileRef}>

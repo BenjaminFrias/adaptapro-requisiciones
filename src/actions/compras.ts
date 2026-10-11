@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { atencionComprasSchema, AtencionComprasInput } from "@/schemas/compras.schema";
 import { revalidatePath } from "next/cache";
+import { crearNotificaciones } from "@/lib/notificaciones";
 
 /**
  * Obtener requisiciones para la bandeja de Compras (Aprobadas y En Compra) (RF-16)
@@ -127,6 +128,13 @@ export async function registrarEnCompra(
             comentario: `Marcada 'En compra' con orden ${validData.numeroOrdenCompra} - Proveedor: ${validData.proveedor}`,
           },
         });
+
+        // Notificar al solicitante que su pedido está en proceso de compra
+        await crearNotificaciones(tx, {
+          usuarioIds: [requisicion.solicitanteId],
+          requisicionId,
+          mensaje: `Tu requisición ${requisicion.numero} está en compra (Orden: ${validData.numeroOrdenCompra}).`,
+        });
       }
     });
 
@@ -177,6 +185,13 @@ export async function marcarAtendida(requisicionId: number, comentario: string =
           usuarioId: userId,
           comentario: comentario ? `Atendida: ${comentario}` : "Bienes o servicios recibidos y entregados a satisfacción",
         },
+      });
+
+      // Notificar al solicitante que la requisición fue atendida
+      await crearNotificaciones(tx, {
+        usuarioIds: [requisicion.solicitanteId],
+        requisicionId,
+        mensaje: `Tu requisición ${requisicion.numero} ha sido atendida y completada.`,
       });
     });
 

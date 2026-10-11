@@ -3,6 +3,10 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import {
+  crearNotificaciones,
+  getUsuariosCompras,
+} from "@/lib/notificaciones";
 
 /**
  * Obtener requisiciones pendientes de aprobación para el departamento del aprobador (RF-12)
@@ -99,6 +103,21 @@ export async function aprobarRequisicion(requisicionId: number, comentario: stri
           comentario: comentario ? `Aprobada: ${comentario}` : "Requisición aprobada por el jefe de departamento",
         },
       });
+
+      // Notificar al solicitante
+      await crearNotificaciones(tx, {
+        usuarioIds: [requisicion.solicitanteId],
+        requisicionId,
+        mensaje: `Tu requisición ${requisicion.numero} ha sido aprobada.`,
+      });
+
+      // Notificar al equipo de Compras
+      const usuariosComprasIds = await getUsuariosCompras(tx, userId);
+      await crearNotificaciones(tx, {
+        usuarioIds: usuariosComprasIds,
+        requisicionId,
+        mensaje: `Requisición ${requisicion.numero} aprobada y lista para gestión de compra.`,
+      });
     });
 
     revalidatePath("/aprobaciones");
@@ -159,6 +178,13 @@ export async function rechazarRequisicion(requisicionId: number, motivo: string)
           comentario: `Rechazada. Motivo: ${motivo.trim()}`,
         },
       });
+
+      // Notificar al solicitante del rechazo
+      await crearNotificaciones(tx, {
+        usuarioIds: [requisicion.solicitanteId],
+        requisicionId,
+        mensaje: `Tu requisición ${requisicion.numero} ha sido rechazada: "${motivo.trim()}".`,
+      });
     });
 
     revalidatePath("/aprobaciones");
@@ -218,6 +244,13 @@ export async function devolverRequisicion(requisicionId: number, comentario: str
           usuarioId: userId,
           comentario: `Devuelta para corrección: ${comentario.trim()}`,
         },
+      });
+
+      // Notificar al solicitante para que realice correcciones
+      await crearNotificaciones(tx, {
+        usuarioIds: [requisicion.solicitanteId],
+        requisicionId,
+        mensaje: `Tu requisición ${requisicion.numero} fue devuelta para corrección: "${comentario.trim()}".`,
       });
     });
 

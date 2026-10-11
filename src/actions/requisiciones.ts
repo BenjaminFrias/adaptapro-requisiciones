@@ -5,6 +5,10 @@ import { db } from "@/lib/db";
 import { requisicionSchema, RequisicionInput } from "@/schemas/requisicion.schema";
 import { revalidatePath } from "next/cache";
 import type { EstadoRequisicion } from "@prisma/client";
+import {
+  crearNotificaciones,
+  getAprobadoresDepartamento,
+} from "@/lib/notificaciones";
 
 /**
  * Genera el siguiente número correlativo atómico en formato REQ-YYYY-NNNN
@@ -137,6 +141,16 @@ export async function crearRequisicion(
         },
       });
 
+      // Notificar a los aprobadores del departamento si se envía a aprobación
+      if (enviarDirectamente) {
+        const aprobadorIds = await getAprobadoresDepartamento(tx, deptoId, userId);
+        await crearNotificaciones(tx, {
+          usuarioIds: aprobadorIds,
+          requisicionId: req.id,
+          mensaje: `Nueva requisición ${req.numero} pendiente de tu aprobación.`,
+        });
+      }
+
       return req;
     });
 
@@ -249,6 +263,23 @@ export async function editarRequisicion(
           comentario: comentarioHistorial,
         },
       });
+
+      // Si se envía a aprobación, notificar a los aprobadores del departamento
+      if (enviarDirectamente) {
+        const aprobadorIds = await getAprobadoresDepartamento(
+          tx,
+          requisicion.departamentoId,
+          userId
+        );
+        await crearNotificaciones(tx, {
+          usuarioIds: aprobadorIds,
+          requisicionId,
+          mensaje:
+            requisicion.estado === "DEVUELTA"
+              ? `Requisición ${numero} corregida y reenviada para aprobación.`
+              : `Requisición ${numero} enviada para aprobación.`,
+        });
+      }
     });
 
     revalidatePath("/dashboard");
@@ -323,6 +354,18 @@ export async function enviarRequisicion(requisicionId: number) {
           usuarioId: userId,
           comentario: "Enviada a aprobación por el solicitante",
         },
+      });
+
+      // Notificar a los aprobadores del departamento
+      const aprobadorIds = await getAprobadoresDepartamento(
+        tx,
+        requisicion.departamentoId,
+        userId
+      );
+      await crearNotificaciones(tx, {
+        usuarioIds: aprobadorIds,
+        requisicionId,
+        mensaje: `Nueva requisición ${numero} pendiente de tu aprobación.`,
       });
     });
 
