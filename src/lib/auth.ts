@@ -1,9 +1,13 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/schemas/auth.schema";
 import type { Rol } from "@prisma/client";
+
+export class InactiveUserError extends CredentialsSignin {
+  code = "inactive_user";
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
@@ -29,14 +33,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { usuario, password } = parsedCredentials.data;
 
-        // Buscar por nombre de usuario o por correo electrónico
+        // Buscar por nombre de usuario o por correo electrónico (incluyendo inactivos para verificar)
         const user = await db.usuario.findFirst({
           where: {
             OR: [
               { usuario: usuario.toLowerCase() },
               { correo: usuario.toLowerCase() },
             ],
-            activo: true,
           },
           include: {
             departamento: true,
@@ -51,6 +54,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!passwordsMatch) {
           return null;
+        }
+
+        // Si la contraseña es correcta pero la cuenta está inactiva, lanzar InactiveUserError
+        if (!user.activo) {
+          throw new InactiveUserError();
         }
 
         return {

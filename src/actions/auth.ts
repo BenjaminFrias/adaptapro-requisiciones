@@ -1,6 +1,6 @@
 'use server';
 
-import { signIn, signOut, auth } from '@/lib/auth';
+import { signIn, signOut, auth, InactiveUserError } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { changePasswordSchema, loginSchema } from '@/schemas/auth.schema';
 import bcrypt from 'bcryptjs';
@@ -28,6 +28,29 @@ export async function loginAction(formData: FormData) {
 		return { success: true };
 	} catch (error) {
 		if (error instanceof AuthError) {
+			const cause =
+				typeof error.cause === 'object' && error.cause !== null
+					? (error.cause as Record<string, unknown>)
+					: null;
+			const causeErr =
+				cause && typeof cause.err === 'object' && cause.err !== null
+					? (cause.err as Record<string, unknown>)
+					: null;
+
+			const isInactive =
+				error instanceof InactiveUserError ||
+				('code' in error && error.code === 'inactive_user') ||
+				(cause !== null && cause.code === 'inactive_user') ||
+				(causeErr !== null && causeErr.code === 'inactive_user') ||
+				error.message.includes('inactive_user');
+
+			if (isInactive) {
+				return {
+					success: false,
+					error: 'Tu cuenta se encuentra inactiva. Contacta al administrador del sistema.',
+				};
+			}
+
 			switch (error.type) {
 				case 'CredentialsSignin':
 					return {
