@@ -358,10 +358,16 @@ export async function cancelarRequisicion(requisicionId: number, motivo: string 
       return { success: false, error: "No tienes permiso para cancelar esta requisición" };
     }
 
-    if (requisicion.estado === "APROBADA" || requisicion.estado === "EN_COMPRA" || requisicion.estado === "ATENDIDA") {
+    if (
+      requisicion.estado === "APROBADA" ||
+      requisicion.estado === "EN_COMPRA" ||
+      requisicion.estado === "ATENDIDA" ||
+      requisicion.estado === "RECHAZADA" ||
+      requisicion.estado === "CANCELADA"
+    ) {
       return {
         success: false,
-        error: "No se puede cancelar una requisición que ya ha sido aprobada o atendida",
+        error: "No se puede cancelar una requisición que ha sido rechazada, aprobada o finalizada",
       };
     }
 

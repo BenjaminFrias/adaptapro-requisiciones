@@ -324,6 +324,7 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 											{req.estado !== 'APROBADA' &&
 												req.estado !== 'EN_COMPRA' &&
 												req.estado !== 'ATENDIDA' &&
+												req.estado !== 'RECHAZADA' &&
 												req.estado !== 'CANCELADA' && (
 													<Button
 														variant="ghost"
