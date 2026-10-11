@@ -14,10 +14,6 @@ import {
 	Sparkles,
 	CheckCircle2,
 	Clock,
-	FileText,
-	ShieldAlert,
-	ShoppingBag,
-	CheckSquare,
 	KeyRound,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -364,51 +360,6 @@ export function Navbar({ user }: NavbarProps) {
 										<div className="py-2.5 text-xs text-slate-600 dark:text-slate-400 flex items-center gap-2">
 											<Building2 className="w-4 h-4 text-slate-400 shrink-0" />
 											<span className="truncate">{user.departamentoNombre}</span>
-										</div>
-
-										{/* Accesos rápidos de rol */}
-										<div className="py-2 border-t border-slate-100 dark:border-zinc-800 space-y-1">
-											<Link
-												href="/dashboard"
-												onClick={() => setIsProfileOpen(false)}
-												className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-											>
-												<FileText className="w-3.5 h-3.5 text-slate-400" />
-												<span>Mis Requisiciones</span>
-											</Link>
-
-											{user.rol === 'APROBADOR' && (
-												<Link
-													href="/aprobaciones"
-													onClick={() => setIsProfileOpen(false)}
-													className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-												>
-													<CheckSquare className="w-3.5 h-3.5 text-amber-500" />
-													<span>Bandeja de Aprobaciones</span>
-												</Link>
-											)}
-
-											{user.rol === 'COMPRAS' && (
-												<Link
-													href="/compras"
-													onClick={() => setIsProfileOpen(false)}
-													className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-												>
-													<ShoppingBag className="w-3.5 h-3.5 text-blue-500" />
-													<span>Gestión de Compras</span>
-												</Link>
-											)}
-
-											{user.rol === 'ADMINISTRADOR' && (
-												<Link
-													href="/admin"
-													onClick={() => setIsProfileOpen(false)}
-													className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-												>
-													<ShieldAlert className="w-3.5 h-3.5 text-purple-500" />
-													<span>Panel de Administración</span>
-												</Link>
-											)}
 										</div>
 
 										{/* Seguridad / Cambiar Contraseña */}
