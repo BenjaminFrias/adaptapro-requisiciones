@@ -39,6 +39,8 @@ import {
 } from "lucide-react";
 import type { RequisicionConRelaciones } from "@/types/requisicion";
 import { formatMontoBs } from "@/utils/currency";
+import { usePagination } from "@/hooks/usePagination";
+import { Pagination } from "@/components/ui/pagination";
 
 interface AprobacionesClientProps {
   user: {
@@ -68,6 +70,24 @@ export function AprobacionesClient({ user, requisiciones }: AprobacionesClientPr
       req.justificacion.toLowerCase().includes(busqueda.toLowerCase()) ||
       (req.solicitante?.nombre && req.solicitante.nombre.toLowerCase().includes(busqueda.toLowerCase()))
     );
+  });
+
+  // Paginación reactiva
+  const {
+    currentPage,
+    pageSize,
+    totalPages,
+    totalItems,
+    paginatedItems,
+    startItem,
+    endItem,
+    canNext,
+    canPrev,
+    goToPage,
+    setPageSize,
+  } = usePagination({
+    items: pendientes,
+    initialPageSize: 15,
   });
 
   const handleOpenAction = (req: RequisicionConRelaciones, action: "APROBAR" | "RECHAZAR" | "DEVOLVER") => {
@@ -179,7 +199,7 @@ export function AprobacionesClient({ user, requisiciones }: AprobacionesClientPr
                   </TableCell>
                 </TableRow>
               ) : (
-                pendientes.map((req) => {
+                paginatedItems.map((req) => {
                   const esPropia = String(req.solicitanteId) === String(user.id);
 
                   return (
@@ -286,6 +306,20 @@ export function AprobacionesClient({ user, requisiciones }: AprobacionesClientPr
               )}
             </TableBody>
           </Table>
+
+          {/* Paginador */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            startItem={startItem}
+            endItem={endItem}
+            canNext={canNext}
+            canPrev={canPrev}
+            onPageChange={goToPage}
+            onPageSizeChange={setPageSize}
+          />
         </div>
 
         {/* Modal de Detalle */}

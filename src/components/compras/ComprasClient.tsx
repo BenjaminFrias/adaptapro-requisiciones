@@ -45,6 +45,8 @@ import {
 	ESTADOS_FILTRO_COMPRAS,
 	getEstadoLabel,
 } from '@/constants/requisicion';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
 
 interface ComprasClientProps {
 	user: {
@@ -90,6 +92,24 @@ export function ComprasClient({ user, requisiciones }: ComprasClientProps) {
 		const coincideEstado =
 			filtroEstado === 'TODOS' || req.estado === filtroEstado;
 		return coincideTexto && coincideEstado;
+	});
+
+	// Paginación reactiva sobre los resultados filtrados
+	const {
+		currentPage,
+		pageSize,
+		totalPages,
+		totalItems,
+		paginatedItems,
+		startItem,
+		endItem,
+		canNext,
+		canPrev,
+		goToPage,
+		setPageSize,
+	} = usePagination({
+		items: listaFiltrada,
+		initialPageSize: 15,
 	});
 
 	const handleOpenCompra = (req: RequisicionConRelaciones) => {
@@ -272,7 +292,7 @@ export function ComprasClient({ user, requisiciones }: ComprasClientProps) {
 									</TableCell>
 								</TableRow>
 							) : (
-								listaFiltrada.map((req) => (
+								paginatedItems.map((req) => (
 									<TableRow
 										key={req.id}
 										className="hover:bg-slate-50/60 dark:hover:bg-zinc-800/40 border-b border-slate-100 dark:border-zinc-800/70"
@@ -371,6 +391,20 @@ export function ComprasClient({ user, requisiciones }: ComprasClientProps) {
 							)}
 						</TableBody>
 					</Table>
+
+					{/* Paginador */}
+					<Pagination
+						currentPage={currentPage}
+						totalPages={totalPages}
+						totalItems={totalItems}
+						pageSize={pageSize}
+						startItem={startItem}
+						endItem={endItem}
+						canNext={canNext}
+						canPrev={canPrev}
+						onPageChange={goToPage}
+						onPageSizeChange={setPageSize}
+					/>
 				</div>
 
 				{/* Modal de Detalle */}

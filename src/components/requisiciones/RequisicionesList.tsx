@@ -41,6 +41,8 @@ import {
 	ESTADOS_FILTRO_DASHBOARD,
 	getEstadoLabel,
 } from '@/constants/requisicion';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
 
 interface RequisicionesListProps {
 	requisiciones: RequisicionConRelaciones[];
@@ -70,6 +72,24 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 			filtroEstado === 'TODOS' || req.estado === filtroEstado;
 
 		return coincideTexto && coincideEstado;
+	});
+
+	// Paginación reactiva sobre la lista filtrada
+	const {
+		currentPage,
+		pageSize,
+		totalPages,
+		totalItems,
+		paginatedItems,
+		startItem,
+		endItem,
+		canNext,
+		canPrev,
+		goToPage,
+		setPageSize,
+	} = usePagination({
+		items: requisicionesFiltradas,
+		initialPageSize: 15,
 	});
 
 	const handleOpenEnviar = (req: RequisicionConRelaciones) => {
@@ -195,7 +215,7 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 								</TableCell>
 							</TableRow>
 						) : (
-							requisicionesFiltradas.map((req) => (
+							paginatedItems.map((req) => (
 								<TableRow
 									key={req.id}
 									className="hover:bg-slate-50/60 dark:hover:bg-zinc-800/40 transition-colors border-b border-slate-100 dark:border-zinc-800/70"
@@ -331,6 +351,20 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 						)}
 					</TableBody>
 				</Table>
+
+				{/* Paginador */}
+				<Pagination
+					currentPage={currentPage}
+					totalPages={totalPages}
+					totalItems={totalItems}
+					pageSize={pageSize}
+					startItem={startItem}
+					endItem={endItem}
+					canNext={canNext}
+					canPrev={canPrev}
+					onPageChange={goToPage}
+					onPageSizeChange={setPageSize}
+				/>
 			</div>
 
 			{/* Modal de Detalle Completo de la Requisición */}

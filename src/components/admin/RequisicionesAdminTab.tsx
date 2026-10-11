@@ -42,6 +42,8 @@ import {
 import Link from 'next/link';
 import type { RequisicionConRelaciones } from '@/types/requisicion';
 import { ESTADOS_FILTRO_ADMIN, getEstadoLabel } from '@/constants/requisicion';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
 
 interface RequisicionesAdminTabProps {
 	requisiciones: RequisicionConRelaciones[];
@@ -99,6 +101,24 @@ export function RequisicionesAdminTab({
 			filtroDepto === 'TODOS' || req.departamento?.nombre === filtroDepto;
 
 		return coincideTexto && coincideEstado && coincideDepto;
+	});
+
+	// Paginación reactiva sobre la lista filtrada
+	const {
+		currentPage,
+		pageSize,
+		totalPages,
+		totalItems,
+		paginatedItems,
+		startItem,
+		endItem,
+		canNext,
+		canPrev,
+		goToPage,
+		setPageSize,
+	} = usePagination({
+		items: listaFiltradaReq,
+		initialPageSize: 15,
 	});
 
 	const handleExportCSV = () => {
@@ -344,7 +364,7 @@ export function RequisicionesAdminTab({
 								</TableCell>
 							</TableRow>
 						) : (
-							listaFiltradaReq.map((req) => (
+							paginatedItems.map((req) => (
 								<TableRow
 									key={req.id}
 									className="hover:bg-slate-50/60 border-b border-slate-100"
@@ -413,6 +433,20 @@ export function RequisicionesAdminTab({
 						)}
 					</TableBody>
 				</Table>
+
+				{/* Paginador */}
+				<Pagination
+					currentPage={currentPage}
+					totalPages={totalPages}
+					totalItems={totalItems}
+					pageSize={pageSize}
+					startItem={startItem}
+					endItem={endItem}
+					canNext={canNext}
+					canPrev={canPrev}
+					onPageChange={goToPage}
+					onPageSizeChange={setPageSize}
+				/>
 			</div>
 
 			{/* Modal Detalle Completo de Requisición */}
