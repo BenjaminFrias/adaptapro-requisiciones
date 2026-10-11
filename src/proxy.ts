@@ -49,8 +49,8 @@ export const config = {
      * - api/auth (endpoints de autenticación)
      * - _next/static (archivos estáticos)
      * - _next/image (optimización de imágenes)
-     * - favicon.ico y archivos públicos
+     * - favicon.ico y archivos públicos estáticos (svg, png, jpg, etc.)
      */
-    "/((?!api/auth|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

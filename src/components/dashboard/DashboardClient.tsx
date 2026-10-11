@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Navbar } from '@/components/layout/Navbar';
 import { RequisicionesList } from '@/components/requisiciones/RequisicionesList';
 import { RequisicionForm } from '@/components/requisiciones/RequisicionForm';
@@ -189,35 +190,14 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 					<DialogContent className="sm:max-w-4xl w-[96vw] max-w-4xl bg-white dark:bg-[#151518] border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
 						<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-900/70 border-b border-slate-200/80 dark:border-zinc-800">
 							<div className="flex items-center gap-3">
-								<div
-									className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm shadow-[#301996]/20 shrink-0"
-									style={{
-										background:
-											'linear-gradient(135deg, #301996 0%, #2563eb 100%)',
-									}}
-								>
-									{/* Ícono Estrella Geométrica */}
-									<svg
-										viewBox="0 0 24 24"
-										fill="currentColor"
-										className="w-5 h-5 text-white"
-										aria-hidden="true"
-									>
-										<g transform="translate(12, 12)">
-											{[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-												<rect
-													key={deg}
-													x="-1.5"
-													y="-9"
-													width="3"
-													height="6.8"
-													rx="1.5"
-													transform={`rotate(${deg})`}
-												/>
-											))}
-											<circle cx="0" cy="0" r="2.2" />
-										</g>
-									</svg>
+								<div className="w-10 h-10 rounded-xl bg-[#035786] flex items-center justify-center p-2 shadow-sm shadow-[#035786]/20 shrink-0">
+									<Image
+										src="/brand/logo-icono-white.svg"
+										alt="AdaptaPro Ícono"
+										width={26}
+										height={20}
+										className="w-full h-auto object-contain"
+									/>
 								</div>
 								<div>
 									<DialogTitle className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">

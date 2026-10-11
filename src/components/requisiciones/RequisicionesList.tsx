@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Image from 'next/image';
 import { EstadoBadge } from './EstadoBadge';
 import { Timeline } from './Timeline';
 import {
@@ -353,35 +354,14 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 					<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-900/70 border-b border-slate-200/80 dark:border-zinc-800">
 						<div className="flex items-center justify-between gap-3">
 							<div className="flex items-center gap-3">
-								<div
-									className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm shadow-[#301996]/20 shrink-0"
-									style={{
-										background:
-											'linear-gradient(135deg, #301996 0%, #2563eb 100%)',
-									}}
-								>
-									{/* Ícono de estrella */}
-									<svg
-										viewBox="0 0 24 24"
-										fill="currentColor"
-										className="w-5 h-5 text-white"
-										aria-hidden="true"
-									>
-										<g transform="translate(12, 12)">
-											{[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-												<rect
-													key={deg}
-													x="-1.5"
-													y="-9"
-													width="3"
-													height="6.8"
-													rx="1.5"
-													transform={`rotate(${deg})`}
-												/>
-											))}
-											<circle cx="0" cy="0" r="2.2" />
-										</g>
-									</svg>
+								<div className="w-10 h-10 rounded-xl bg-[#035786] flex items-center justify-center p-2 shadow-sm shadow-[#035786]/20 shrink-0">
+									<Image
+										src="/brand/logo-icono-white.svg"
+										alt="AdaptaPro Ícono"
+										width={26}
+										height={20}
+										className="w-full h-auto object-contain"
+									/>
 								</div>
 								<div>
 									<DialogTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">

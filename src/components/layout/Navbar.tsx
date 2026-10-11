@@ -20,6 +20,7 @@ import {
 	CheckSquare,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 
 interface NavbarProps {
@@ -158,47 +159,32 @@ export function Navbar({ user }: NavbarProps) {
 					<nav className="bg-white/95 dark:bg-[#16161a]/95 backdrop-blur-md rounded-2xl sm:rounded-full border border-slate-200/80 dark:border-zinc-800/80 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.04)] px-3.5 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-3 transition-all">
 						{/* Logo y Marca AdaptaPro a la izquierda */}
 						<div className="flex items-center gap-2 sm:gap-3 shrink-0">
-							<Link href="/dashboard" className="flex items-center gap-2.5 sm:gap-3 group">
-								{/* Ícono circular distintivo con gradiente */}
-								<div
-									className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white shadow-sm shadow-[#301996]/25 group-hover:scale-105 transition-transform shrink-0"
-									style={{
-										background:
-											'linear-gradient(135deg, #10b981 0%, #2563eb 50%, #301996 100%)',
-									}}
-								>
-									{/* Estrella Geométrica AdaptaPro */}
-									<svg
-										viewBox="0 0 24 24"
-										fill="currentColor"
-										className="w-5 h-5 text-white"
-										aria-hidden="true"
-									>
-										<g transform="translate(12, 12)">
-											{[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-												<rect
-													key={deg}
-													x="-1.5"
-													y="-8.8"
-													width="3"
-													height="6.6"
-													rx="1.5"
-													transform={`rotate(${deg})`}
-												/>
-											))}
-											<circle cx="0" cy="0" r="2.2" />
-										</g>
-									</svg>
+							<Link
+								href="/dashboard"
+								className="flex items-center gap-2.5 sm:gap-3 group"
+								aria-label="Ir al Inicio"
+							>
+								{/* Ícono circular distintivo con el color azul del logo y versión icono blanca */}
+								<div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#035786] flex items-center justify-center p-1.5 shadow-sm shadow-[#035786]/20 group-hover:scale-105 transition-transform shrink-0">
+									<Image
+										src="/brand/logo-icono-white.svg"
+										alt="AdaptaPro Ícono"
+										width={24}
+										height={18}
+										className="w-full h-auto object-contain"
+										priority
+									/>
 								</div>
 
-								<div className="flex items-center gap-1.5">
-									<span className="font-bold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight leading-none group-hover:text-[#301996] dark:group-hover:text-blue-400 transition-colors">
-										AdaptaPro
-									</span>
-									<span className="hidden sm:inline-block text-[10px] font-semibold tracking-wider px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300">
-										ERP
-									</span>
-								</div>
+								{/* Versión completa del logo en azul */}
+								<Image
+									src="/brand/logo-full-blue.svg"
+									alt="AdaptaPro"
+									width={130}
+									height={30}
+									className="h-6 sm:h-7 w-auto object-contain shrink-0 group-hover:opacity-90 transition-opacity"
+									priority
+								/>
 							</Link>
 						</div>
 

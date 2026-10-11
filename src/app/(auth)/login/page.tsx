@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { loginAction } from '@/actions/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,11 +49,11 @@ export default function LoginPage() {
 				className="relative w-full lg:w-[48%] xl:w-[46%] rounded-[24px] sm:rounded-[32px] overflow-hidden p-6 sm:p-8 lg:p-10 xl:p-12 flex flex-col justify-between min-h-90 lg:h-full text-white shadow-xl shrink-0"
 				style={{
 					background: `
-            radial-gradient(circle at 12% 16%, #38bdf8 0%, transparent 42%),
-            radial-gradient(circle at 85% 20%, #c084fc 0%, transparent 45%),
-            radial-gradient(circle at 80% 82%, #93c5fd 0%, transparent 45%),
-            radial-gradient(circle at 25% 78%, #1e1b4b 0%, transparent 60%),
-            linear-gradient(140deg, #2563eb 0%, #301996 46%, #1e1b4b 100%)
+            radial-gradient(circle at 12% 16%, #035786 0%, transparent 42%),
+            radial-gradient(circle at 85% 20%, #035786 0%, transparent 45%),
+            radial-gradient(circle at 80% 82%, #7096c2 0%, transparent 45%),
+            radial-gradient(circle at 25% 78%, #031726 0%, transparent 60%),
+            linear-gradient(140deg, #0284c7 0%, #035786 46%, #02121e 100%)
           `,
 				}}
 			>
@@ -62,40 +63,22 @@ export default function LoginPage() {
 					aria-hidden="true"
 				/>
 
-				{/* Ícono de Estrella Geométrica superior */}
-				<div className="relative z-10">
-					<div className="inline-flex items-center justify-center">
-						<svg
-							viewBox="0 0 24 24"
-							fill="currentColor"
-							className="w-9 h-9 sm:w-10 sm:h-10 text-white drop-shadow-md"
-							aria-hidden="true"
-						>
-							<g transform="translate(12, 12)">
-								{[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-									<rect
-										key={deg}
-										x="-1.5"
-										y="-9.2"
-										width="3"
-										height="7"
-										rx="1.5"
-										transform={`rotate(${deg})`}
-									/>
-								))}
-								<circle cx="0" cy="0" r="2.5" />
-							</g>
-						</svg>
-					</div>
+				{/* Logo AdaptaPro en la parte superior izquierda */}
+				<div className="relative z-10 flex items-center justify-start">
+					<Image
+						src="/brand/logo-full-white.svg"
+						alt="AdaptaPro"
+						width={220}
+						height={50}
+						className="h-8 sm:h-9 lg:h-10 w-auto object-contain"
+						priority
+					/>
 				</div>
 
-				{/* Textos de Marca AdaptaPro en la parte inferior */}
-				<div className="relative z-10 space-y-2 pt-6">
-					<span className="text-xs uppercase tracking-widest font-semibold text-white/80 block">
-						Sistema de Requisiciones
-					</span>
+				{/* Título y descripción en la parte inferior */}
+				<div className="relative z-10 space-y-2 sm:space-y-3 pt-6">
 					<h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-						AdaptaPro ERP
+						Sistema de Requisiciones
 					</h2>
 					<p className="text-xs sm:text-sm text-white/85 max-w-md leading-relaxed font-normal">
 						Accede a tu plataforma para gestionar solicitudes, aprobaciones y
@@ -107,31 +90,6 @@ export default function LoginPage() {
 			{/* Lado Derecho: Formulario de Login ocupando la totalidad del espacio restante */}
 			<div className="flex-1 flex flex-col justify-center items-center px-4 py-3 sm:px-8 lg:px-10 lg:h-full overflow-y-auto lg:overflow-y-visible">
 				<div className="w-full max-w-105 space-y-4 xl:space-y-5 my-auto">
-					{/* Ícono de estrella en color acento AdaptaPro */}
-					<div>
-						<svg
-							viewBox="0 0 24 24"
-							fill="currentColor"
-							className="w-7 h-7 text-[#301996] dark:text-[#6a9bcc]"
-							aria-hidden="true"
-						>
-							<g transform="translate(12, 12)">
-								{[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-									<rect
-										key={deg}
-										x="-1.5"
-										y="-9.2"
-										width="3"
-										height="7"
-										rx="1.5"
-										transform={`rotate(${deg})`}
-									/>
-								))}
-								<circle cx="0" cy="0" r="2.5" />
-							</g>
-						</svg>
-					</div>
-
 					{/* Encabezado del Formulario */}
 					<div className="space-y-1">
 						<h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">

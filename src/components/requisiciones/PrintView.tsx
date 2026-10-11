@@ -4,6 +4,7 @@ import type { RequisicionConRelaciones } from "@/types/requisicion";
 import { formatMontoBs } from "@/utils/currency";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
+import Image from "next/image";
 
 interface PrintViewProps {
   requisicion: RequisicionConRelaciones;
@@ -37,14 +38,26 @@ export function PrintView({ requisicion }: PrintViewProps) {
       {/* Encabezado del Formato Oficial */}
       <div className="border-b-2 border-slate-900 pb-4 mb-6">
         <div className="flex justify-between items-start">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#301996] text-white flex items-center justify-center font-black text-lg">
-              AP
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-[#035786] flex items-center justify-center p-2 text-white shrink-0">
+              <Image
+                src="/brand/logo-icono-white.svg"
+                alt="AdaptaPro Ícono"
+                width={28}
+                height={20}
+                className="w-full h-auto object-contain"
+                priority
+              />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-none">
-                ADAPTAPRO ERP
-              </h1>
+              <Image
+                src="/brand/logo-full-blue.svg"
+                alt="AdaptaPro"
+                width={130}
+                height={30}
+                className="h-6 w-auto object-contain"
+                priority
+              />
               <p className="text-xs text-slate-600 font-medium mt-1">
                 Comprobante Oficial de Requisición de Bienes y Servicios
               </p>
