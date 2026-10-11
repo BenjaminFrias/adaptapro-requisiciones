@@ -91,7 +91,8 @@ export function RequisicionForm({
 						{
 							descripcion: '',
 							cantidad: 1,
-							unidad: 'unid',
+							unidad:
+								requisicionInicial?.tipo === 'SERVICIO' ? 'servicio' : 'unid',
 							costoEstimado: null,
 						},
 					],
@@ -103,7 +104,12 @@ export function RequisicionForm({
 		name: 'items',
 	});
 
-	// Observar artículos para calcular el total estimado en tiempo real
+	// Observar tipo y artículos en tiempo real
+	const watchedTipo = useWatch({
+		control: form.control,
+		name: 'tipo',
+	});
+
 	const watchedItems = useWatch({
 		control: form.control,
 		name: 'items',
@@ -188,7 +194,24 @@ export function RequisicionForm({
 						<Select
 							defaultValue={form.getValues('tipo')}
 							onValueChange={(val) => {
-								if (val) form.setValue('tipo', val as 'BIEN' | 'SERVICIO');
+								if (val) {
+									const nuevoTipo = val as 'BIEN' | 'SERVICIO';
+									form.setValue('tipo', nuevoTipo);
+									// Si es un formulario nuevo, actualizar items existentes que tengan la unidad por defecto
+									const currentItems = form.getValues('items') || [];
+									currentItems.forEach((item, idx) => {
+										if (
+											!item.unidad ||
+											item.unidad === 'unid' ||
+											item.unidad === 'servicio'
+										) {
+											form.setValue(
+												`items.${idx}.unidad`,
+												nuevoTipo === 'SERVICIO' ? 'servicio' : 'unid',
+											);
+										}
+									});
+								}
 							}}
 						>
 							<SelectTrigger className="h-11 bg-white dark:bg-zinc-800 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700 focus:ring-[#301996]/20 px-3.5">
@@ -276,7 +299,9 @@ export function RequisicionForm({
 						</span>
 						<h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
 							<PackagePlus className="w-4 h-4 text-[#301996] dark:text-[#6a9bcc]" />
-							Artículos / Servicios Solicitados
+							{watchedTipo === 'SERVICIO'
+								? 'Servicios Solicitados'
+								: 'Artículos Solicitados'}
 						</h3>
 					</div>
 
@@ -288,13 +313,14 @@ export function RequisicionForm({
 							append({
 								descripcion: '',
 								cantidad: 1,
-								unidad: 'unid',
+								unidad: watchedTipo === 'SERVICIO' ? 'servicio' : 'unid',
 								costoEstimado: null,
 							})
 						}
 						className="text-xs h-8 px-3 rounded-xl gap-1.5 border-slate-200 dark:border-zinc-700 hover:border-[#301996] hover:text-[#301996] transition-colors"
 					>
-						<Plus className="w-3.5 h-3.5" /> Agregar item
+						<Plus className="w-3.5 h-3.5" />{' '}
+						{watchedTipo === 'SERVICIO' ? 'Agregar servicio' : 'Agregar artículo'}
 					</Button>
 				</div>
 
@@ -306,7 +332,11 @@ export function RequisicionForm({
 
 				{/* Encabezados de tabla de ítems para pantallas medianas */}
 				<div className="hidden sm:grid grid-cols-12 gap-2 px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-					<div className="col-span-5">Descripción del Ítem *</div>
+					<div className="col-span-5">
+						{watchedTipo === 'SERVICIO'
+							? 'Descripción del Servicio *'
+							: 'Descripción del Ítem *'}
+					</div>
 					<div className="col-span-2">Cantidad *</div>
 					<div className="col-span-2">Unidad *</div>
 					<div className="col-span-2 text-right">Costo Est. (Bs)</div>
@@ -322,7 +352,11 @@ export function RequisicionForm({
 							{/* Descripción */}
 							<div className="col-span-12 sm:col-span-5 space-y-1">
 								<Input
-									placeholder="ej. Papel bond tamaño carta 75g *"
+									placeholder={
+										watchedTipo === 'SERVICIO'
+											? 'ej. Mantenimiento preventivo de aires acondicionados *'
+											: 'ej. Papel bond tamaño carta 75g *'
+									}
 									{...form.register(`items.${index}.descripcion`)}
 									className="h-9 text-xs bg-white dark:bg-zinc-800 rounded-lg border-slate-200 dark:border-zinc-700 focus-visible:ring-[#301996]/20 focus-visible:border-[#301996]"
 								/>
@@ -354,7 +388,11 @@ export function RequisicionForm({
 							{/* Unidad */}
 							<div className="col-span-6 sm:col-span-2 space-y-1">
 								<Input
-									placeholder="Unid. (pza, resma)"
+									placeholder={
+										watchedTipo === 'SERVICIO'
+											? 'ej. servicio, hrs, mes'
+											: 'Unid. (pza, resma)'
+									}
 									{...form.register(`items.${index}.unidad`)}
 									className="h-9 text-xs bg-white dark:bg-zinc-800 rounded-lg border-slate-200 dark:border-zinc-700 focus-visible:ring-[#301996]/20 focus-visible:border-[#301996]"
 								/>
