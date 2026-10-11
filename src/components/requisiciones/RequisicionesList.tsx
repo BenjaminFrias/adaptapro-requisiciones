@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { EstadoBadge } from './EstadoBadge';
+import { Timeline } from './Timeline';
 import {
 	enviarRequisicion,
 	cancelarRequisicion,
@@ -513,6 +514,59 @@ export function RequisicionesList({ requisiciones }: RequisicionesListProps) {
 										</div>
 									</div>
 								)}
+							</div>
+
+							{/* Datos de Compras si existen */}
+							{selectedReq.comprasDatos && (
+								<div className="space-y-2 pt-1">
+									<span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+										Datos de Compra y Proveedor
+									</span>
+									<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-200/60 dark:border-blue-900/40 text-xs">
+										<div>
+											<span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+												Proveedor
+											</span>
+											<span className="font-semibold text-slate-800 dark:text-slate-200">
+												{selectedReq.comprasDatos.proveedor}
+											</span>
+										</div>
+										<div>
+											<span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+												N° Orden Compra
+											</span>
+											<span className="font-mono font-semibold text-[#301996] dark:text-[#6a9bcc]">
+												{selectedReq.comprasDatos.numeroOrdenCompra}
+											</span>
+										</div>
+										<div>
+											<span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+												Costo Final
+											</span>
+											<span className="font-mono font-bold text-slate-900 dark:text-white">
+												{formatMontoBs(Number(selectedReq.comprasDatos.costoFinal), true)}
+											</span>
+										</div>
+										<div>
+											<span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+												Entrega Estimada
+											</span>
+											<span className="font-semibold text-slate-800 dark:text-slate-200">
+												{selectedReq.comprasDatos.fechaEntregaEstimada
+													? new Date(selectedReq.comprasDatos.fechaEntregaEstimada).toLocaleDateString("es-VE", { timeZone: "UTC" })
+													: "-"}
+											</span>
+										</div>
+									</div>
+								</div>
+							)}
+
+							{/* Línea de Tiempo e Historial inmutable */}
+							<div className="space-y-2.5 pt-1">
+								<span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+									Línea de Tiempo y Trazabilidad (Historial)
+								</span>
+								<Timeline historial={selectedReq.historial} />
 							</div>
 
 							{/* Pie con botón de cierre */}

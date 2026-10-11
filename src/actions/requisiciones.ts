@@ -46,8 +46,19 @@ export async function getMisRequisiciones() {
       items: true,
       departamento: true,
       solicitante: {
-        select: { nombre: true, usuario: true },
+        select: { id: true, nombre: true, usuario: true },
       },
+      historial: {
+        include: {
+          usuario: {
+            select: { nombre: true, usuario: true, rol: true },
+          },
+        },
+        orderBy: {
+          fecha: "asc",
+        },
+      },
+      comprasDatos: true,
     },
     orderBy: {
       createdAt: "desc",
