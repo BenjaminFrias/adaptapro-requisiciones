@@ -39,6 +39,7 @@ import {
 	FileText,
 	Search,
 	Eye,
+	X,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { RequisicionConRelaciones } from '@/types/requisicion';
@@ -255,56 +256,80 @@ export function AdminClient({ user, data }: AdminClientProps) {
 					</div>
 				</div>
 
-				{/* Filtros y Buscador */}
-				<div className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+				{/* Barra de Filtros, Búsqueda y Selectores */}
+				<div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-xs flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
 					<div className="relative flex-1 max-w-md">
 						<Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
 						<Input
 							placeholder="Buscar por correlativo, usuario, proveedor..."
 							value={busqueda}
 							onChange={(e) => setBusqueda(e.target.value)}
-							className="pl-9.5 h-10 text-xs sm:text-sm bg-slate-50/70 dark:bg-zinc-800/70 rounded-xl"
+							className="pl-9.5 pr-8 h-10 text-xs sm:text-sm bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus-visible:ring-[#301996]/20 focus-visible:border-[#301996]"
 						/>
+						{busqueda && (
+							<button
+								type="button"
+								onClick={() => setBusqueda('')}
+								className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+								aria-label="Limpiar búsqueda"
+							>
+								<X className="w-3.5 h-3.5" />
+							</button>
+						)}
 					</div>
 
-					<div className="flex flex-wrap items-center gap-2.5">
+					<div className="flex flex-col sm:flex-row sm:items-center gap-3">
 						{/* Filtro por Departamento */}
-						<Select
-							value={filtroDepto}
-							onValueChange={(val) => setFiltroDepto(val || 'TODOS')}
-						>
-							<SelectTrigger className="h-10 text-xs min-w-44 bg-slate-50/70 dark:bg-zinc-800/70 rounded-xl">
-								<SelectValue placeholder="Departamento" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="TODOS">Todos los dptos.</SelectItem>
-								{departamentos.map((d) => (
-									<SelectItem key={d} value={d}>
-										{d}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+						<div className="flex items-center gap-2">
+							<span className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
+								Departamento:
+							</span>
+							<Select
+								value={filtroDepto}
+								onValueChange={(val) => setFiltroDepto(val || 'TODOS')}
+							>
+								<SelectTrigger className="h-10.5 min-w-44 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus:ring-[#301996]/20 px-3.5">
+									<SelectValue placeholder="Todos los dptos.">
+										{(val) =>
+											val === 'TODOS' || !val ? 'Todos los dptos.' : val
+										}
+									</SelectValue>
+								</SelectTrigger>
+								<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
+									<SelectItem value="TODOS">Todos los dptos.</SelectItem>
+									{departamentos.map((d) => (
+										<SelectItem key={d} value={d}>
+											{d}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
 
 						{/* Filtro por Estado */}
-						<Select
-							items={ESTADOS_FILTRO_ADMIN}
-							value={filtroEstado}
-							onValueChange={(val) => setFiltroEstado(val || 'TODOS')}
-						>
-							<SelectTrigger className="h-10 text-xs min-w-44 bg-slate-50/70 dark:bg-zinc-800/70 rounded-xl">
-								<SelectValue placeholder="Estado">
-									{(val) => getEstadoLabel(val) || 'Todos los estados'}
-								</SelectValue>
-							</SelectTrigger>
-							<SelectContent>
-								{ESTADOS_FILTRO_ADMIN.map((item) => (
-									<SelectItem key={item.value} value={item.value}>
-										{item.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+						<div className="flex items-center gap-2">
+							<span className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
+								Estado:
+							</span>
+							<Select
+								items={ESTADOS_FILTRO_ADMIN}
+								value={filtroEstado}
+								onValueChange={(val) => setFiltroEstado(val || 'TODOS')}
+							>
+								<SelectTrigger className="h-10.5 min-w-44 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus:ring-[#301996]/20 px-3.5">
+									<SelectValue placeholder="Todos los estados">
+										{(val) => getEstadoLabel(val) || 'Todos los estados'}
+									</SelectValue>
+								</SelectTrigger>
+								<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
+									{ESTADOS_FILTRO_ADMIN.map((item) => (
+										<SelectItem key={item.value} value={item.value}>
+											{item.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
 				</div>
 
