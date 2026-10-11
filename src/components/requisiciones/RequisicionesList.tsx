@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import Image from 'next/image';
+import { useState } from 'react';
 import { EstadoBadge } from './EstadoBadge';
-import { Timeline } from './Timeline';
 import {
-	enviarRequisicion,
-	cancelarRequisicion,
-} from '@/actions/requisiciones';
+	AccionRequisicionModal,
+	type RequisicionModalAction,
+} from './AccionRequisicionModal';
+import { RequisicionDetalleModal } from './RequisicionDetalleModal';
 import {
 	Table,
 	TableBody,
@@ -26,12 +25,6 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
-import {
 	Search,
 	Send,
 	XCircle,
@@ -41,11 +34,9 @@ import {
 	Flame,
 	X,
 	Layers,
-	Loader2,
 	Edit3,
 } from 'lucide-react';
 import type { RequisicionConRelaciones } from '@/types/requisicion';
-import { formatMontoBs } from '@/utils/currency';
 
 interface RequisicionesListProps {
 	requisiciones: RequisicionConRelaciones[];
@@ -53,10 +44,15 @@ interface RequisicionesListProps {
 }
 
 export function RequisicionesList({ requisiciones, onEditar }: RequisicionesListProps) {
-	const [isPending, startTransition] = useTransition();
 	const [busqueda, setBusqueda] = useState('');
 	const [filtroEstado, setFiltroEstado] = useState('TODOS');
 	const [selectedReq, setSelectedReq] =
+		useState<RequisicionConRelaciones | null>(null);
+
+	// Estados para el modal de acción (Enviar / Reenviar / Cancelar)
+	const [modalAction, setModalAction] =
+		useState<RequisicionModalAction | null>(null);
+	const [reqParaAccion, setReqParaAccion] =
 		useState<RequisicionConRelaciones | null>(null);
 
 	// Filtrado reactivo en cliente (búsqueda por número o justificación + filtro por estado)
@@ -72,30 +68,21 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 		return coincideTexto && coincideEstado;
 	});
 
-	const handleEnviar = (id: number) => {
-		if (confirm('¿Estás seguro de enviar esta requisición a aprobación?')) {
-			startTransition(async () => {
-				await enviarRequisicion(id);
-			});
-		}
+	const handleOpenEnviar = (req: RequisicionConRelaciones) => {
+		setReqParaAccion(req);
+		setModalAction('ENVIAR');
 	};
 
-	const handleCancelar = (id: number) => {
-		const motivo = prompt('Indica el motivo de la cancelación:');
-		if (motivo !== null) {
-			startTransition(async () => {
-				await cancelarRequisicion(id, motivo);
-			});
-		}
+	const handleOpenCancelar = (req: RequisicionConRelaciones) => {
+		setReqParaAccion(req);
+		setModalAction('CANCELAR');
 	};
 
-	// Cálculo del costo total estimado en el modal de detalle
-	const totalEstimadoModal =
-		selectedReq?.items?.reduce((sum, item) => {
-			const cost = Number(item.costoEstimado || 0);
-			const qty = Number(item.cantidad || 0);
-			return sum + cost * qty;
-		}, 0) || 0;
+	const handleActionSuccess = () => {
+		if (selectedReq?.id === reqParaAccion?.id) {
+			setSelectedReq(null);
+		}
+	};
 
 	return (
 		<div className="space-y-4">
@@ -307,16 +294,15 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 												<Button
 													variant="ghost"
 													size="sm"
-													disabled={isPending}
 													className="h-8 w-8 p-0 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
-													onClick={() => handleEnviar(req.id)}
-													title="Enviar a Aprobación"
+													onClick={() => handleOpenEnviar(req)}
+													title={
+														req.estado === 'DEVUELTA'
+															? 'Reenviar a Aprobación'
+															: 'Enviar a Aprobación'
+													}
 												>
-													{isPending ? (
-														<Loader2 className="w-4 h-4 animate-spin" />
-													) : (
-														<Send className="w-4 h-4" />
-													)}
+													<Send className="w-4 h-4" />
 												</Button>
 											)}
 
@@ -329,9 +315,8 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 													<Button
 														variant="ghost"
 														size="sm"
-														disabled={isPending}
 														className="h-8 w-8 p-0 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-														onClick={() => handleCancelar(req.id)}
+														onClick={() => handleOpenCancelar(req)}
 														title="Cancelar Requisición"
 													>
 														<XCircle className="w-4 h-4" />
@@ -347,240 +332,29 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 			</div>
 
 			{/* Modal de Detalle Completo de la Requisición */}
-			<Dialog
+			<RequisicionDetalleModal
+				requisicion={selectedReq}
 				open={!!selectedReq}
-				onOpenChange={(open) => !open && setSelectedReq(null)}
-			>
-				<DialogContent className="sm:max-w-2xl w-[95vw] max-w-2xl bg-white dark:bg-[#151518] border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
-					<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-900/70 border-b border-slate-200/80 dark:border-zinc-800">
-						<div className="flex items-center justify-between gap-3">
-							<div className="flex items-center gap-3">
-								<div className="w-10 h-10 rounded-xl bg-[#035786] flex items-center justify-center p-2 shadow-sm shadow-[#035786]/20 shrink-0">
-									<Image
-										src="/brand/logo-icono-white.svg"
-										alt="AdaptaPro Ícono"
-										width={26}
-										height={20}
-										className="w-full h-auto object-contain"
-									/>
-								</div>
-								<div>
-									<DialogTitle className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-										<span>
-											{selectedReq?.numero
-												? selectedReq.numero
-												: `Borrador #${selectedReq?.id}`}
-										</span>
-									</DialogTitle>
-									<p className="text-xs text-slate-400 dark:text-slate-500">
-										Detalles y partidas presupuestarias
-									</p>
-								</div>
-							</div>
+				onClose={() => setSelectedReq(null)}
+				onEnviar={handleOpenEnviar}
+				onCancelar={handleOpenCancelar}
+			/>
 
-							{selectedReq && <EstadoBadge estado={selectedReq.estado} />}
-						</div>
-					</DialogHeader>
-
-					{selectedReq && (
-						<div className="p-5 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto">
-							{/* Metadata en Grid */}
-							<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-slate-50/80 dark:bg-zinc-900/60 rounded-xl border border-slate-200/60 dark:border-zinc-800">
-								<div>
-									<span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
-										Tipo
-									</span>
-									<span className="font-semibold text-xs text-slate-800 dark:text-slate-200">
-										{selectedReq.tipo === 'BIEN' ? 'Bien' : 'Servicio'}
-									</span>
-								</div>
-
-								<div>
-									<span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
-										Prioridad
-									</span>
-									<span
-										className={`font-semibold text-xs ${
-											selectedReq.prioridad === 'URGENTE'
-												? 'text-red-600 dark:text-red-400'
-												: 'text-slate-800 dark:text-slate-200'
-										}`}
-									>
-										{selectedReq.prioridad}
-									</span>
-								</div>
-
-								<div>
-									<span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
-										Fecha Requerida
-									</span>
-									<span className="font-semibold text-xs text-slate-800 dark:text-slate-200">
-										{new Date(selectedReq.fechaRequerida).toLocaleDateString(
-											'es-VE',
-											{
-												timeZone: 'UTC',
-											},
-										)}
-									</span>
-								</div>
-
-								<div>
-									<span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
-										Departamento
-									</span>
-									<span className="font-semibold text-xs text-slate-800 dark:text-slate-200 truncate block">
-										{selectedReq.departamento?.nombre || '-'}
-									</span>
-								</div>
-							</div>
-
-							{/* Justificación */}
-							<div>
-								<span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1.5">
-									Justificación del Pedido
-								</span>
-								<div className="p-3 rounded-xl bg-slate-50/50 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-normal">
-									{selectedReq.justificacion}
-								</div>
-							</div>
-
-							{/* Lista de Artículos */}
-							<div className="space-y-2">
-								<div className="flex items-center justify-between">
-									<span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-										Artículos Solicitados ({selectedReq.items?.length || 0})
-									</span>
-								</div>
-
-								<div className="rounded-xl border border-slate-200/80 dark:border-zinc-800 overflow-hidden">
-									<table className="w-full text-left text-xs">
-										<thead className="bg-slate-50 dark:bg-zinc-800/60 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-zinc-800">
-											<tr>
-												<th className="py-2.5 px-3">Descripción</th>
-												<th className="py-2.5 px-3">Cantidad</th>
-												<th className="py-2.5 px-3">Unidad</th>
-												<th className="py-2.5 px-3 text-right">Costo Est.</th>
-												<th className="py-2.5 px-3 text-right">Subtotal</th>
-											</tr>
-										</thead>
-										<tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-											{selectedReq.items?.map((item, idx) => {
-												const cost = Number(item.costoEstimado || 0);
-												const qty = Number(item.cantidad || 0);
-												const subtotal = cost * qty;
-
-												return (
-													<tr
-														key={item.id || idx}
-														className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/30"
-													>
-														<td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200">
-															{item.descripcion}
-														</td>
-														<td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">
-															{qty}
-														</td>
-														<td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">
-															{item.unidad}
-														</td>
-														<td className="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400 font-mono">
-															{cost > 0 ? formatMontoBs(cost, true) : '-'}
-														</td>
-														<td className="py-2.5 px-3 text-right text-slate-800 dark:text-slate-200 font-mono font-semibold">
-															{subtotal > 0
-																? formatMontoBs(subtotal, true)
-																: '-'}
-														</td>
-													</tr>
-												);
-											})}
-										</tbody>
-									</table>
-								</div>
-
-								{/* Resumen Total Estimado */}
-								{totalEstimadoModal > 0 && (
-									<div className="flex justify-end pt-1">
-										<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700">
-											<span className="text-[11px] font-semibold text-slate-500 uppercase">
-												Total Estimado:
-											</span>
-											<span className="text-sm font-bold font-mono text-[#301996] dark:text-[#6a9bcc]">
-												{formatMontoBs(totalEstimadoModal, true)}
-											</span>
-										</div>
-									</div>
-								)}
-							</div>
-
-							{/* Datos de Compras si existen */}
-							{selectedReq.comprasDatos && (
-								<div className="space-y-2 pt-1">
-									<span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
-										Datos de Compra y Proveedor
-									</span>
-									<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-200/60 dark:border-blue-900/40 text-xs">
-										<div>
-											<span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
-												Proveedor
-											</span>
-											<span className="font-semibold text-slate-800 dark:text-slate-200">
-												{selectedReq.comprasDatos.proveedor}
-											</span>
-										</div>
-										<div>
-											<span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
-												N° Orden Compra
-											</span>
-											<span className="font-mono font-semibold text-[#301996] dark:text-[#6a9bcc]">
-												{selectedReq.comprasDatos.numeroOrdenCompra}
-											</span>
-										</div>
-										<div>
-											<span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
-												Costo Final
-											</span>
-											<span className="font-mono font-bold text-slate-900 dark:text-white">
-												{formatMontoBs(Number(selectedReq.comprasDatos.costoFinal), true)}
-											</span>
-										</div>
-										<div>
-											<span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
-												Entrega Estimada
-											</span>
-											<span className="font-semibold text-slate-800 dark:text-slate-200">
-												{selectedReq.comprasDatos.fechaEntregaEstimada
-													? new Date(selectedReq.comprasDatos.fechaEntregaEstimada).toLocaleDateString("es-VE", { timeZone: "UTC" })
-													: "-"}
-											</span>
-										</div>
-									</div>
-								</div>
-							)}
-
-							{/* Línea de Tiempo e Historial inmutable */}
-							<div className="space-y-2.5 pt-1">
-								<span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
-									Línea de Tiempo y Trazabilidad (Historial)
-								</span>
-								<Timeline historial={selectedReq.historial} />
-							</div>
-
-							{/* Pie con botón de cierre */}
-							<div className="flex justify-end pt-3 border-t border-slate-200/80 dark:border-zinc-800">
-								<Button
-									type="button"
-									variant="outline"
-									onClick={() => setSelectedReq(null)}
-									className="text-xs h-9 rounded-xl border-slate-200 dark:border-zinc-700"
-								>
-									Cerrar
-								</Button>
-							</div>
-						</div>
-					)}
-				</DialogContent>
-			</Dialog>
+			{/* Modal de Acción (Confirmar Envío / Reenvío o Cancelación con Observación) */}
+			<AccionRequisicionModal
+				key={
+					reqParaAccion && modalAction
+						? `${reqParaAccion.id}-${modalAction}`
+						: 'accion-modal'
+				}
+				action={modalAction}
+				requisicion={reqParaAccion}
+				onClose={() => {
+					setModalAction(null);
+					setReqParaAccion(null);
+				}}
+				onSuccess={handleActionSuccess}
+			/>
 		</div>
 	);
 }

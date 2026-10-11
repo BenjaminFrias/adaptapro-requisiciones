@@ -464,7 +464,7 @@ export function ComprasClient({ user, requisiciones }: ComprasClientProps) {
                   className="rounded-xl text-xs h-9 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
                 >
                   {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
-                  Guardar y Marcar "En Compra"
+                  Guardar y Marcar &quot;En Compra&quot;
                 </Button>
               </div>
             </div>
