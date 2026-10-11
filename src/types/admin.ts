@@ -19,3 +19,14 @@ export interface DepartamentoSimple {
 	id: number;
 	nombre: string;
 }
+
+export interface DepartamentoAdmin {
+	id: number;
+	nombre: string;
+	activo: boolean;
+	createdAt: string | Date;
+	_count?: {
+		usuarios: number;
+		requisiciones: number;
+	};
+}

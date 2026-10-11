@@ -10,6 +10,12 @@ import {
 	type CrearUsuarioInput,
 	type EditarUsuarioInput,
 } from '@/schemas/usuario.schema';
+import {
+	crearDepartamentoSchema,
+	editarDepartamentoSchema,
+	type CrearDepartamentoInput,
+	type EditarDepartamentoInput,
+} from '@/schemas/departamento.schema';
 
 /**
  * Obtener todas las requisiciones, usuarios, departamentos y estadísticas globales para el módulo de Administración
@@ -69,11 +75,23 @@ export async function getAdminDashboardData() {
 		},
 	});
 
-	// 3. Obtener departamentos activos para selectores
+	// 3. Obtener todos los departamentos con recuento de usuarios y requisiciones asociadas
 	const departamentos = await db.departamento.findMany({
-		where: { activo: true },
-		select: { id: true, nombre: true },
-		orderBy: { nombre: 'asc' },
+		select: {
+			id: true,
+			nombre: true,
+			activo: true,
+			createdAt: true,
+			_count: {
+				select: {
+					usuarios: true,
+					requisiciones: true,
+				},
+			},
+		},
+		orderBy: {
+			nombre: 'asc',
+		},
 	});
 
 	// 4. Conteo de usuarios y departamentos activos
@@ -336,5 +354,153 @@ export async function toggleEstadoUsuarioAction(id: number) {
 		message: nuevoEstado
 			? 'Usuario reactivado exitosamente'
 			: 'Usuario inactivado exitosamente',
+	};
+}
+
+/**
+ * Crear un nuevo departamento
+ */
+export async function crearDepartamentoAction(data: CrearDepartamentoInput) {
+	const session = await auth();
+	if (!session?.user) {
+		return { success: false, error: 'No autenticado' };
+	}
+
+	if (session.user.rol !== 'ADMINISTRADOR') {
+		return { success: false, error: 'Acceso restringido para Administradores' };
+	}
+
+	const validation = crearDepartamentoSchema.safeParse(data);
+	if (!validation.success) {
+		return {
+			success: false,
+			error:
+				validation.error.issues[0]?.message ||
+				'Datos del departamento inválidos',
+		};
+	}
+
+	const { nombre, activo } = validation.data;
+	const nombreTrimmed = nombre.trim();
+
+	// Verificar nombre único
+	const existing = await db.departamento.findFirst({
+		where: {
+			nombre: { equals: nombreTrimmed, mode: 'insensitive' },
+		},
+	});
+
+	if (existing) {
+		return {
+			success: false,
+			error: 'Ya existe un departamento con este nombre',
+		};
+	}
+
+	const nuevoDepto = await db.departamento.create({
+		data: {
+			nombre: nombreTrimmed,
+			activo: activo ?? true,
+		},
+	});
+
+	revalidatePath('/admin');
+	return { success: true, id: nuevoDepto.id };
+}
+
+/**
+ * Editar departamento existente
+ */
+export async function editarDepartamentoAction(data: EditarDepartamentoInput) {
+	const session = await auth();
+	if (!session?.user) {
+		return { success: false, error: 'No autenticado' };
+	}
+
+	if (session.user.rol !== 'ADMINISTRADOR') {
+		return { success: false, error: 'Acceso restringido para Administradores' };
+	}
+
+	const validation = editarDepartamentoSchema.safeParse(data);
+	if (!validation.success) {
+		return {
+			success: false,
+			error:
+				validation.error.issues[0]?.message ||
+				'Datos del departamento inválidos',
+		};
+	}
+
+	const { id, nombre, activo } = validation.data;
+	const nombreTrimmed = nombre.trim();
+
+	const target = await db.departamento.findUnique({
+		where: { id },
+	});
+	if (!target) {
+		return { success: false, error: 'Departamento no encontrado' };
+	}
+
+	// Verificar colisión con otro departamento
+	const duplicate = await db.departamento.findFirst({
+		where: {
+			id: { not: id },
+			nombre: { equals: nombreTrimmed, mode: 'insensitive' },
+		},
+	});
+
+	if (duplicate) {
+		return {
+			success: false,
+			error: 'Ya existe otro departamento con este nombre',
+		};
+	}
+
+	await db.departamento.update({
+		where: { id },
+		data: {
+			nombre: nombreTrimmed,
+			activo,
+		},
+	});
+
+	revalidatePath('/admin');
+	return { success: true };
+}
+
+/**
+ * Activar o inactivar un departamento (Soft delete)
+ */
+export async function toggleEstadoDepartamentoAction(id: number) {
+	const session = await auth();
+	if (!session?.user) {
+		return { success: false, error: 'No autenticado' };
+	}
+
+	if (session.user.rol !== 'ADMINISTRADOR') {
+		return { success: false, error: 'Acceso restringido para Administradores' };
+	}
+
+	const target = await db.departamento.findUnique({
+		where: { id },
+	});
+	if (!target) {
+		return { success: false, error: 'Departamento no encontrado' };
+	}
+
+	const nuevoEstado = !target.activo;
+
+	await db.departamento.update({
+		where: { id },
+		data: { activo: nuevoEstado },
+	});
+
+	revalidatePath('/admin');
+	return {
+		success: true,
+		activo: nuevoEstado,
+		message: nuevoEstado
+			? 'Departamento reactivado exitosamente'
+			: 'Departamento inactivado exitosamente',
 	};
 }

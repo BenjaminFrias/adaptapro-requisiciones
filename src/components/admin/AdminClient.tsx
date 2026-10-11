@@ -42,12 +42,15 @@ import {
 	X,
 	UserCheck,
 	UserX,
+	CheckCircle2,
+	Building2,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { RequisicionConRelaciones } from '@/types/requisicion';
-import type { UsuarioAdmin, DepartamentoSimple } from '@/types/admin';
+import type { UsuarioAdmin, DepartamentoAdmin } from '@/types/admin';
 import { ESTADOS_FILTRO_ADMIN, getEstadoLabel } from '@/constants/requisicion';
 import { UsuariosAdminTable } from './UsuariosAdminTable';
+import { DepartamentosAdminTable } from './DepartamentosAdminTable';
 
 interface AdminClientProps {
 	user: {
@@ -59,7 +62,7 @@ interface AdminClientProps {
 	data: {
 		requisiciones: RequisicionConRelaciones[];
 		usuarios: UsuarioAdmin[];
-		departamentos: DepartamentoSimple[];
+		departamentos: DepartamentoAdmin[];
 		metricas: {
 			totalRequisiciones: number;
 			totalUsuarios: number;
@@ -71,9 +74,9 @@ interface AdminClientProps {
 
 export function AdminClient({ user, data }: AdminClientProps) {
 	const { requisiciones, usuarios = [], departamentos = [], metricas } = data;
-	const [activeTab, setActiveTab] = useState<'requisiciones' | 'usuarios'>(
-		'requisiciones',
-	);
+	const [activeTab, setActiveTab] = useState<
+		'requisiciones' | 'usuarios' | 'departamentos'
+	>('requisiciones');
 
 	// Filtros Requisiciones
 	const [busqueda, setBusqueda] = useState('');
@@ -101,6 +104,10 @@ export function AdminClient({ user, data }: AdminClientProps) {
 	// Contadores de usuarios
 	const totalUsuariosActivos = usuarios.filter((u) => u.activo).length;
 	const totalUsuariosInactivos = usuarios.filter((u) => !u.activo).length;
+
+	// Contadores de departamentos
+	const totalDeptosActivos = departamentos.filter((d) => d.activo).length;
+	const totalDeptosInactivos = departamentos.filter((d) => !d.activo).length;
 
 	const listaFiltradaReq = requisiciones.filter((req) => {
 		const coincideTexto =
@@ -193,6 +200,22 @@ export function AdminClient({ user, data }: AdminClientProps) {
 						Gestión de Usuarios
 						<span className="ml-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 font-bold">
 							{usuarios.length}
+						</span>
+					</button>
+
+					<button
+						type="button"
+						onClick={() => setActiveTab('departamentos')}
+						className={`flex items-center gap-2 pb-3 px-3.5 font-semibold text-xs sm:text-sm border-b-2 transition-colors relative ${
+							activeTab === 'departamentos'
+								? 'border-[#301996] text-[#301996] dark:text-purple-400 dark:border-purple-400'
+								: 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+						}`}
+					>
+						<Building className="w-4 h-4" />
+						Departamentos
+						<span className="ml-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 font-bold">
+							{departamentos.length}
 						</span>
 					</button>
 				</div>
@@ -590,12 +613,91 @@ export function AdminClient({ user, data }: AdminClientProps) {
 						{/* Tabla CRUD de Usuarios */}
 						<UsuariosAdminTable
 							usuarios={usuarios}
-							departamentos={departamentos}
+							departamentos={departamentos.filter((d) => d.activo)}
 							currentUser={{
 								usuario: user.usuario,
 								rol: user.rol,
 							}}
 						/>
+					</div>
+				)}
+
+				{/* Contenido Pestaña Departamentos */}
+				{activeTab === 'departamentos' && (
+					<div className="space-y-6">
+						{/* Tarjetas resumen de Departamentos */}
+						<div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+							<div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+								<div className="flex items-center justify-between mb-2">
+									<span className="text-xs font-semibold text-slate-500">
+										Total Departamentos
+									</span>
+									<div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+										<Building className="w-4 h-4" />
+									</div>
+								</div>
+								<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+									{departamentos.length}
+								</div>
+								<p className="text-[11px] text-slate-400 mt-0.5">
+									Áreas registradas
+								</p>
+							</div>
+
+							<div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+								<div className="flex items-center justify-between mb-2">
+									<span className="text-xs font-semibold text-slate-500">
+										Departamentos Activos
+									</span>
+									<div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+										<CheckCircle2 className="w-4 h-4" />
+									</div>
+								</div>
+								<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+									{totalDeptosActivos}
+								</div>
+								<p className="text-[11px] text-emerald-600 mt-0.5">
+									Operativos para requisiciones
+								</p>
+							</div>
+
+							<div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+								<div className="flex items-center justify-between mb-2">
+									<span className="text-xs font-semibold text-slate-500">
+										Departamentos Inactivos
+									</span>
+									<div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+										<Building2 className="w-4 h-4" />
+									</div>
+								</div>
+								<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+									{totalDeptosInactivos}
+								</div>
+								<p className="text-[11px] text-rose-600 mt-0.5">
+									Deshabilitados
+								</p>
+							</div>
+
+							<div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+								<div className="flex items-center justify-between mb-2">
+									<span className="text-xs font-semibold text-slate-500">
+										Total Usuarios Asignados
+									</span>
+									<div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+										<Users className="w-4 h-4" />
+									</div>
+								</div>
+								<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+									{usuarios.length}
+								</div>
+								<p className="text-[11px] text-purple-600 mt-0.5">
+									Distribuidos en áreas
+								</p>
+							</div>
+						</div>
+
+						{/* Tabla CRUD de Departamentos */}
+						<DepartamentosAdminTable departamentos={departamentos} />
 					</div>
 				)}
 
