@@ -2,28 +2,43 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, type LoginInput } from '@/schemas/auth.schema';
 import { loginAction } from '@/actions/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from 'cn';
 import { AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
-	const [usuario, setUsuario] = useState('');
-	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const {
+		register,
+		handleSubmit,
+		setValue,
+		clearErrors,
+		formState: { errors, isSubmitting },
+	} = useForm<LoginInput>({
+		resolver: zodResolver(loginSchema),
+		defaultValues: {
+			usuario: '',
+			password: '',
+		},
+		mode: 'onSubmit',
+		reValidateMode: 'onChange',
+	});
+
+	const onSubmit = async (data: LoginInput) => {
 		setError(null);
-		setLoading(true);
 
 		try {
 			const formData = new FormData();
-			formData.append('usuario', usuario);
-			formData.append('password', password);
+			formData.append('usuario', data.usuario);
+			formData.append('password', data.password);
 
 			const res = await loginAction(formData);
 			if (res && !res.success) {
@@ -31,14 +46,13 @@ export default function LoginPage() {
 			}
 		} catch {
 			// Next.js redirection trigger en Server Action
-		} finally {
-			setLoading(false);
 		}
 	};
 
 	const fillQuickUser = (user: string) => {
-		setUsuario(user);
-		setPassword('password123');
+		setValue('usuario', user, { shouldValidate: true });
+		setValue('password', 'password123', { shouldValidate: true });
+		clearErrors();
 		setError(null);
 	};
 
@@ -112,7 +126,7 @@ export default function LoginPage() {
 					)}
 
 					{/* Formulario */}
-					<form onSubmit={handleSubmit} className="space-y-3.5 xl:space-y-4">
+					<form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-3.5 xl:space-y-4">
 						<div className="space-y-1.5">
 							<Label
 								htmlFor="usuario"
@@ -120,18 +134,33 @@ export default function LoginPage() {
 							>
 								Usuario o Correo
 							</Label>
-							<Input
-								id="usuario"
-								name="usuario"
-								type="text"
-								autoComplete="username"
-								placeholder="ej. solicitante o tu@correo.com"
-								value={usuario}
-								onChange={(e) => setUsuario(e.target.value)}
-								disabled={loading}
-								required
-								className="h-10.5 sm:h-11 rounded-xl bg-slate-50/70 dark:bg-zinc-900/70 border-slate-200 dark:border-zinc-800 px-3.5 text-sm focus-visible:ring-[#301996]/20 focus-visible:border-[#301996] transition-all"
-							/>
+							<div className="relative">
+								<Input
+									id="usuario"
+									type="text"
+									autoComplete="username"
+									placeholder="ej. solicitante o tu@correo.com"
+									disabled={isSubmitting}
+									aria-invalid={!!errors.usuario}
+									{...register('usuario')}
+									className={cn(
+										'h-10.5 sm:h-11 rounded-xl px-3.5 text-sm transition-all',
+										errors.usuario
+											? 'bg-red-50/70 dark:bg-red-950/25 border-red-400 dark:border-red-500/70 text-red-900 dark:text-red-200 placeholder:text-red-300 dark:placeholder:text-red-700/60 focus-visible:ring-red-500/20 focus-visible:border-red-500 pr-10'
+											: 'bg-slate-50/70 dark:bg-zinc-900/70 border-slate-200 dark:border-zinc-800 focus-visible:ring-[#301996]/20 focus-visible:border-[#301996]'
+									)}
+								/>
+								{errors.usuario && (
+									<div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center">
+										<AlertCircle className="h-4.5 w-4.5 fill-red-500 text-white" />
+									</div>
+								)}
+							</div>
+							{errors.usuario && (
+								<p className="text-xs text-red-600 dark:text-red-400 mt-1 animate-in fade-in-50 duration-200">
+									{errors.usuario.message}
+								</p>
+							)}
 						</div>
 
 						<div className="space-y-1.5">
@@ -144,40 +173,53 @@ export default function LoginPage() {
 							<div className="relative">
 								<Input
 									id="password"
-									name="password"
 									type={showPassword ? 'text' : 'password'}
 									autoComplete="current-password"
 									placeholder="••••••••"
-									value={password}
-									onChange={(e) => setPassword(e.target.value)}
-									disabled={loading}
-									required
-									className="h-10.5 sm:h-11 rounded-xl bg-slate-50/70 dark:bg-zinc-900/70 border-slate-200 dark:border-zinc-800 pl-3.5 pr-10 text-sm focus-visible:ring-[#301996]/20 focus-visible:border-[#301996] transition-all"
-								/>
-								<button
-									type="button"
-									onClick={() => setShowPassword(!showPassword)}
-									aria-label={
-										showPassword ? 'Ocultar contraseña' : 'Ver contraseña'
-									}
-									className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 focus:outline-none"
-									tabIndex={-1}
-								>
-									{showPassword ? (
-										<EyeOff className="h-4 w-4" />
-									) : (
-										<Eye className="h-4 w-4" />
+									disabled={isSubmitting}
+									aria-invalid={!!errors.password}
+									{...register('password')}
+									className={cn(
+										'h-10.5 sm:h-11 rounded-xl pl-3.5 text-sm transition-all',
+										errors.password
+											? 'bg-red-50/70 dark:bg-red-950/25 border-red-400 dark:border-red-500/70 text-red-900 dark:text-red-200 placeholder:text-red-300 dark:placeholder:text-red-700/60 focus-visible:ring-red-500/20 focus-visible:border-red-500 pr-16'
+											: 'bg-slate-50/70 dark:bg-zinc-900/70 border-slate-200 dark:border-zinc-800 pr-10 focus-visible:ring-[#301996]/20 focus-visible:border-[#301996]'
 									)}
-								</button>
+								/>
+								<div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+									{errors.password && (
+										<AlertCircle className="h-4.5 w-4.5 fill-red-500 text-white pointer-events-none shrink-0" />
+									)}
+									<button
+										type="button"
+										onClick={() => setShowPassword(!showPassword)}
+										aria-label={
+											showPassword ? 'Ocultar contraseña' : 'Ver contraseña'
+										}
+										className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 focus:outline-none"
+										tabIndex={-1}
+									>
+										{showPassword ? (
+											<EyeOff className="h-4 w-4" />
+										) : (
+											<Eye className="h-4 w-4" />
+										)}
+									</button>
+								</div>
 							</div>
+							{errors.password && (
+								<p className="text-xs text-red-600 dark:text-red-400 mt-1 animate-in fade-in-50 duration-200">
+									{errors.password.message}
+								</p>
+							)}
 						</div>
 
 						<Button
 							type="submit"
 							className="w-full h-10.5 sm:h-11 rounded-xl bg-[#301996] hover:bg-[#26137a] text-white font-medium text-sm sm:text-base shadow-md shadow-[#301996]/25 hover:shadow-lg hover:shadow-[#301996]/35 active:scale-[0.99] transition-all mt-1"
-							disabled={loading}
+							disabled={isSubmitting}
 						>
-							{loading ? (
+							{isSubmitting ? (
 								<>
 									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									Ingresando...
