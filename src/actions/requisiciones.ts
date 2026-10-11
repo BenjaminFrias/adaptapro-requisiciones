@@ -149,6 +149,118 @@ export async function crearRequisicion(
 }
 
 /**
+ * Editar requisición existente (solo permitido en BORRADOR o DEVUELTA - RF-08, RF-14)
+ */
+export async function editarRequisicion(
+  requisicionId: number,
+  data: RequisicionInput,
+  enviarDirectamente: boolean = false
+) {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: "No autenticado" };
+  }
+
+  const parseResult = requisicionSchema.safeParse(data);
+  if (!parseResult.success) {
+    return {
+      success: false,
+      error: parseResult.error.issues[0]?.message || "Datos inválidos",
+    };
+  }
+
+  const validData = parseResult.data;
+  const userId = parseInt(session.user.id, 10);
+
+  try {
+    const requisicion = await db.requisicion.findUnique({
+      where: { id: requisicionId },
+    });
+
+    if (!requisicion) {
+      return { success: false, error: "Requisición no encontrada" };
+    }
+
+    if (requisicion.solicitanteId !== userId && session.user.rol !== "ADMINISTRADOR") {
+      return { success: false, error: "No tienes permiso para editar esta requisición" };
+    }
+
+    if (requisicion.estado !== "BORRADOR" && requisicion.estado !== "DEVUELTA") {
+      return {
+        success: false,
+        error: "Solo se pueden editar requisiciones en Borrador o Devueltas",
+      };
+    }
+
+    await db.$transaction(async (tx) => {
+      // 1. Eliminar partidas anteriores para recrear con los datos actualizados
+      await tx.requisicionItem.deleteMany({
+        where: { requisicionId },
+      });
+
+      // 2. Determinar si se envía a aprobación o se mantiene
+      let nuevoEstado: EstadoRequisicion = requisicion.estado;
+      let numero = requisicion.numero;
+      let fechaEnvio = requisicion.fechaEnvio;
+
+      if (enviarDirectamente) {
+        nuevoEstado = "PENDIENTE_APROBACION";
+        fechaEnvio = new Date();
+        if (!numero) {
+          numero = await generarSiguienteCorrelativo();
+        }
+      }
+
+      // 3. Actualizar datos de la requisición y crear los nuevos ítems
+      await tx.requisicion.update({
+        where: { id: requisicionId },
+        data: {
+          numero,
+          tipo: validData.tipo,
+          prioridad: validData.prioridad,
+          fechaRequerida: new Date(validData.fechaRequerida),
+          justificacion: validData.justificacion,
+          estado: nuevoEstado,
+          fechaEnvio,
+          items: {
+            create: validData.items.map((item) => ({
+              descripcion: item.descripcion,
+              cantidad: item.cantidad,
+              unidad: item.unidad,
+              costoEstimado: item.costoEstimado ? item.costoEstimado : null,
+            })),
+          },
+        },
+      });
+
+      // 4. Registrar en el historial si cambió de estado o si se editaron datos
+      const comentarioHistorial = enviarDirectamente
+        ? requisicion.estado === "DEVUELTA"
+          ? "Correcciones aplicadas y reenviada a aprobación"
+          : "Borrador editado y enviado a aprobación"
+        : "Requisición modificada por el solicitante";
+
+      await tx.historial.create({
+        data: {
+          requisicionId,
+          estadoAnterior: requisicion.estado,
+          estadoNuevo: nuevoEstado,
+          usuarioId: userId,
+          comentario: comentarioHistorial,
+        },
+      });
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/aprobaciones");
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Error al editar requisición:", error);
+    return { success: false, error: "Error al actualizar la requisición" };
+  }
+}
+
+/**
  * Enviar requisición que estaba en BORRADOR a Aprobación (RF-09)
  */
 export async function enviarRequisicion(requisicionId: number) {

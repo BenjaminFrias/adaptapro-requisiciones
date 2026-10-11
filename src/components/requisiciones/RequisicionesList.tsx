@@ -41,15 +41,17 @@ import {
 	X,
 	Layers,
 	Loader2,
+	Edit3,
 } from 'lucide-react';
 import type { RequisicionConRelaciones } from '@/types/requisicion';
 import { formatMontoBs } from '@/utils/currency';
 
 interface RequisicionesListProps {
 	requisiciones: RequisicionConRelaciones[];
+	onEditar?: (req: RequisicionConRelaciones) => void;
 }
 
-export function RequisicionesList({ requisiciones }: RequisicionesListProps) {
+export function RequisicionesList({ requisiciones, onEditar }: RequisicionesListProps) {
 	const [isPending, startTransition] = useTransition();
 	const [busqueda, setBusqueda] = useState('');
 	const [filtroEstado, setFiltroEstado] = useState('TODOS');
@@ -283,6 +285,20 @@ export function RequisicionesList({ requisiciones }: RequisicionesListProps) {
 											>
 												<Eye className="w-4 h-4" />
 											</Button>
+
+											{/* Botón Editar (solo BORRADOR o DEVUELTA) */}
+											{(req.estado === 'BORRADOR' || req.estado === 'DEVUELTA') &&
+												onEditar && (
+													<Button
+														variant="ghost"
+														size="sm"
+														className="h-8 w-8 p-0 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors"
+														onClick={() => onEditar(req)}
+														title="Editar / Corregir Requisición"
+													>
+														<Edit3 className="w-4 h-4" />
+													</Button>
+												)}
 
 											{/* Botón Enviar a Aprobación (solo BORRADOR o DEVUELTA) */}
 											{(req.estado === 'BORRADOR' ||

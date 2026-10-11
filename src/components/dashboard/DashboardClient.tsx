@@ -33,6 +33,7 @@ interface DashboardClientProps {
 
 export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 	const [openCrear, setOpenCrear] = useState(false);
+	const [reqParaEditar, setReqParaEditar] = useState<RequisicionConRelaciones | null>(null);
 
 	// Métricas rápidas
 	const total = requisiciones.length;
@@ -168,11 +169,23 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 
 				{/* Listado con filtros y tabla */}
 				<div className="space-y-4">
-					<RequisicionesList requisiciones={requisiciones} />
+					<RequisicionesList
+						requisiciones={requisiciones}
+						onEditar={(req) => {
+							setReqParaEditar(req);
+							setOpenCrear(true);
+						}}
+					/>
 				</div>
 
-				{/* Modal de Creación de Requisición */}
-				<Dialog open={openCrear} onOpenChange={setOpenCrear}>
+				{/* Modal de Creación / Edición de Requisición */}
+				<Dialog
+					open={openCrear}
+					onOpenChange={(val) => {
+						setOpenCrear(val);
+						if (!val) setReqParaEditar(null);
+					}}
+				>
 					<DialogContent className="sm:max-w-4xl w-[96vw] max-w-4xl bg-white dark:bg-[#151518] border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
 						<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-900/70 border-b border-slate-200/80 dark:border-zinc-800">
 							<div className="flex items-center gap-3">
@@ -208,11 +221,18 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 								</div>
 								<div>
 									<DialogTitle className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-										Crear Nueva Requisición
+										{reqParaEditar
+											? `Editar Requisición ${
+													reqParaEditar.numero
+														? reqParaEditar.numero
+														: `(Borrador #${reqParaEditar.id})`
+											  }`
+											: 'Crear Nueva Requisición'}
 									</DialogTitle>
 									<p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-										Ingresa los datos del requerimiento para iniciar el ciclo
-										de aprobación interno.
+										{reqParaEditar
+											? 'Corrige las partidas o justificación y envíala nuevamente a aprobación.'
+											: 'Ingresa los datos del requerimiento para iniciar el ciclo de aprobación interno.'}
 									</p>
 								</div>
 							</div>
@@ -220,9 +240,17 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 
 						<div className="p-5 sm:p-6 max-h-[78vh] overflow-y-auto">
 							<RequisicionForm
+								key={reqParaEditar ? reqParaEditar.id : 'nueva'}
 								departamentoNombre={user.departamentoNombre}
-								onSuccess={() => setOpenCrear(false)}
-								onCancel={() => setOpenCrear(false)}
+								requisicionInicial={reqParaEditar}
+								onSuccess={() => {
+									setOpenCrear(false);
+									setReqParaEditar(null);
+								}}
+								onCancel={() => {
+									setOpenCrear(false);
+									setReqParaEditar(null);
+								}}
 							/>
 						</div>
 					</DialogContent>

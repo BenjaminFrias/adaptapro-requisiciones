@@ -92,12 +92,26 @@ function CostoEstimadoInput({
 
 interface RequisicionFormDialogProps {
 	departamentoNombre: string;
+	requisicionInicial?: {
+		id: number;
+		tipo: string;
+		prioridad: string;
+		fechaRequerida: string | Date;
+		justificacion: string;
+		items: Array<{
+			descripcion: string;
+			cantidad: number | string;
+			unidad: string;
+			costoEstimado?: number | string | null;
+		}>;
+	} | null;
 	onSuccess: () => void;
 	onCancel: () => void;
 }
 
 export function RequisicionForm({
 	departamentoNombre,
+	requisicionInicial,
 	onSuccess,
 	onCancel,
 }: RequisicionFormDialogProps) {
@@ -107,21 +121,36 @@ export function RequisicionForm({
 	// Fecha mínima: hoy en formato YYYY-MM-DD
 	const hoy = new Date().toISOString().split('T')[0];
 
+	const defaultFecha = requisicionInicial?.fechaRequerida
+		? new Date(requisicionInicial.fechaRequerida).toISOString().split('T')[0]
+		: hoy;
+
 	const form = useForm<RequisicionInput>({
 		resolver: zodResolver(requisicionSchema),
 		defaultValues: {
-			tipo: 'BIEN',
-			prioridad: 'NORMAL',
-			fechaRequerida: hoy,
-			justificacion: '',
-			items: [
-				{
-					descripcion: '',
-					cantidad: 1,
-					unidad: 'unid',
-					costoEstimado: null,
-				},
-			],
+			tipo: (requisicionInicial?.tipo as 'BIEN' | 'SERVICIO') || 'BIEN',
+			prioridad:
+				(requisicionInicial?.prioridad as 'NORMAL' | 'URGENTE') || 'NORMAL',
+			fechaRequerida: defaultFecha,
+			justificacion: requisicionInicial?.justificacion || '',
+			items: requisicionInicial?.items?.length
+				? requisicionInicial.items.map((it) => ({
+						descripcion: it.descripcion,
+						cantidad: Number(it.cantidad),
+						unidad: it.unidad,
+						costoEstimado:
+							it.costoEstimado !== null && it.costoEstimado !== undefined
+								? Number(it.costoEstimado)
+								: null,
+				  }))
+				: [
+						{
+							descripcion: '',
+							cantidad: 1,
+							unidad: 'unid',
+							costoEstimado: null,
+						},
+				  ],
 		},
 	});
 
@@ -146,10 +175,21 @@ export function RequisicionForm({
 	const onSubmit = (data: RequisicionInput, enviarDirectamente: boolean) => {
 		setServerError(null);
 		startTransition(async () => {
-			const res = await crearRequisicion(data, enviarDirectamente);
+			let res;
+			if (requisicionInicial?.id) {
+				const { editarRequisicion } = await import('@/actions/requisiciones');
+				res = await editarRequisicion(
+					requisicionInicial.id,
+					data,
+					enviarDirectamente,
+				);
+			} else {
+				res = await crearRequisicion(data, enviarDirectamente);
+			}
+
 			if (!res.success) {
 				setServerError(
-					res.error || 'Ocurrió un error al guardar la requisición',
+					res.error || 'Ocurrió un error al procesar la requisición',
 				);
 			} else {
 				form.reset();
