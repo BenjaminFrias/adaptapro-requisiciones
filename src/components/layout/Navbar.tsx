@@ -125,12 +125,12 @@ export function Navbar({ user }: NavbarProps) {
 		{
 			name: 'Aprobaciones',
 			href: '/aprobaciones',
-			show: user.rol === 'APROBADOR',
+			show: user.rol === 'APROBADOR' || user.rol === 'ADMINISTRADOR',
 		},
 		{
 			name: 'Compras',
 			href: '/compras',
-			show: user.rol === 'COMPRAS',
+			show: user.rol === 'COMPRAS' || user.rol === 'ADMINISTRADOR',
 		},
 		{
 			name: 'Administración',

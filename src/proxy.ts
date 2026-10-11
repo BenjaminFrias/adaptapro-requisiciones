@@ -28,13 +28,21 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Rutas exclusivas de APROBADOR
-    if (pathname.startsWith("/aprobaciones") && userRole !== "APROBADOR") {
+    // Rutas de APROBADOR (accesibles también por ADMINISTRADOR)
+    if (
+      pathname.startsWith("/aprobaciones") &&
+      userRole !== "APROBADOR" &&
+      userRole !== "ADMINISTRADOR"
+    ) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Rutas exclusivas de COMPRAS
-    if (pathname.startsWith("/compras") && userRole !== "COMPRAS") {
+    // Rutas de COMPRAS (accesibles también por ADMINISTRADOR)
+    if (
+      pathname.startsWith("/compras") &&
+      userRole !== "COMPRAS" &&
+      userRole !== "ADMINISTRADOR"
+    ) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }

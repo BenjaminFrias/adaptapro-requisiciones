@@ -81,6 +81,11 @@ export async function aprobarRequisicion(requisicionId: number, comentario: stri
       return { success: false, error: "La requisición no está pendiente de aprobación" };
     }
 
+    // Solo puede aprobar requisiciones de su propio departamento
+    if (requisicion.departamentoId !== session.user.departamentoId) {
+      return { success: false, error: "Solo puedes aprobar requisiciones de tu departamento" };
+    }
+
     // Regla RF-15: Nadie puede aprobar su propia requisición
     if (requisicion.solicitanteId === userId) {
       return { success: false, error: "No puedes aprobar tu propia requisición" };
@@ -157,6 +162,11 @@ export async function rechazarRequisicion(requisicionId: number, motivo: string)
       return { success: false, error: "Requisición no disponible para rechazo" };
     }
 
+    // Solo puede rechazar requisiciones de su propio departamento
+    if (requisicion.departamentoId !== session.user.departamentoId) {
+      return { success: false, error: "Solo puedes rechazar requisiciones de tu departamento" };
+    }
+
     if (requisicion.solicitanteId === userId) {
       return { success: false, error: "No puedes rechazar tu propia requisición" };
     }
@@ -222,6 +232,11 @@ export async function devolverRequisicion(requisicionId: number, comentario: str
 
     if (!requisicion || requisicion.estado !== "PENDIENTE_APROBACION") {
       return { success: false, error: "Requisición no disponible para devolución" };
+    }
+
+    // Solo puede devolver requisiciones de su propio departamento
+    if (requisicion.departamentoId !== session.user.departamentoId) {
+      return { success: false, error: "Solo puedes devolver requisiciones de tu departamento" };
     }
 
     if (requisicion.solicitanteId === userId) {
