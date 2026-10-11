@@ -10,6 +10,7 @@ import { crearRequisicion } from '@/actions/requisiciones';
 import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CurrencyInput } from '@/components/ui/currency-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -31,64 +32,7 @@ import {
 	Calendar,
 	HelpCircle,
 } from 'lucide-react';
-import { parseMontoBs, formatMontoBs } from '@/utils/currency';
-
-function CostoEstimadoInput({
-	value,
-	onChange,
-}: {
-	value: number | null | undefined;
-	onChange: (val: number | null) => void;
-}) {
-	const [texto, setTexto] = useState(() => {
-		if (value !== null && value !== undefined && !isNaN(value)) {
-			return formatMontoBs(value);
-		}
-		return '';
-	});
-	const [prevValue, setPrevValue] = useState(value);
-
-	if (prevValue !== value) {
-		setPrevValue(value);
-		if (value === null || value === undefined) {
-			setTexto('');
-		}
-	}
-
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const raw = e.target.value;
-		setTexto(raw);
-		const parsed = parseMontoBs(raw);
-		onChange(parsed);
-	};
-
-	const handleBlur = () => {
-		if (!texto.trim()) {
-			setTexto('');
-			onChange(null);
-			return;
-		}
-		const parsed = parseMontoBs(texto);
-		if (parsed !== null) {
-			// Si el usuario escribió "Bs" o "bs", mantener el prefijo "Bs. "
-			const teniaBs = /bs/i.test(texto);
-			setTexto(formatMontoBs(parsed, teniaBs));
-			onChange(parsed);
-		}
-	};
-
-	return (
-		<Input
-			type="text"
-			inputMode="decimal"
-			placeholder="ej. 2.000,00"
-			value={texto}
-			onChange={handleChange}
-			onBlur={handleBlur}
-			className="h-9 text-xs bg-white dark:bg-zinc-800 rounded-lg border-slate-200 dark:border-zinc-700 focus-visible:ring-[#301996]/20 focus-visible:border-[#301996] text-right font-mono"
-		/>
-	);
-}
+import { formatMontoBs } from '@/utils/currency';
 
 interface RequisicionFormDialogProps {
 	departamentoNombre: string;
@@ -142,7 +86,7 @@ export function RequisicionForm({
 							it.costoEstimado !== null && it.costoEstimado !== undefined
 								? Number(it.costoEstimado)
 								: null,
-				  }))
+					}))
 				: [
 						{
 							descripcion: '',
@@ -150,7 +94,7 @@ export function RequisicionForm({
 							unidad: 'unid',
 							costoEstimado: null,
 						},
-				  ],
+					],
 		},
 	});
 
@@ -427,7 +371,7 @@ export function RequisicionForm({
 									control={form.control}
 									name={`items.${index}.costoEstimado`}
 									render={({ field }) => (
-										<CostoEstimadoInput
+										<CurrencyInput
 											value={field.value}
 											onChange={field.onChange}
 										/>
