@@ -37,6 +37,10 @@ import {
 	Edit3,
 } from 'lucide-react';
 import type { RequisicionConRelaciones } from '@/types/requisicion';
+import {
+	ESTADOS_FILTRO_DASHBOARD,
+	getEstadoLabel,
+} from '@/constants/requisicion';
 
 interface RequisicionesListProps {
 	requisiciones: RequisicionConRelaciones[];
@@ -120,23 +124,21 @@ export function RequisicionesList({ requisiciones, onEditar }: RequisicionesList
 					</div>
 
 					<Select
+						items={ESTADOS_FILTRO_DASHBOARD}
 						value={filtroEstado}
 						onValueChange={(val) => setFiltroEstado(val || 'TODOS')}
 					>
 						<SelectTrigger className="h-10.5 min-w-50 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus:ring-[#301996]/20 px-3.5">
-							<SelectValue placeholder="Todos los estados" />
+							<SelectValue placeholder="Todos los estados">
+								{(val) => getEstadoLabel(val) || 'Todos los estados'}
+							</SelectValue>
 						</SelectTrigger>
 						<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
-							<SelectItem value="TODOS">Todos los estados</SelectItem>
-							<SelectItem value="BORRADOR">Borrador</SelectItem>
-							<SelectItem value="PENDIENTE_APROBACION">
-								En Aprobación
-							</SelectItem>
-							<SelectItem value="APROBADA">Aprobada</SelectItem>
-							<SelectItem value="DEVUELTA">Devuelta</SelectItem>
-							<SelectItem value="EN_COMPRA">En Compra</SelectItem>
-							<SelectItem value="ATENDIDA">Atendida</SelectItem>
-							<SelectItem value="CANCELADA">Cancelada</SelectItem>
+							{ESTADOS_FILTRO_DASHBOARD.map((item) => (
+								<SelectItem key={item.value} value={item.value}>
+									{item.label}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 				</div>
