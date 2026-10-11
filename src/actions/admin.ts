@@ -299,7 +299,7 @@ export async function editarUsuarioAction(data: EditarUsuarioInput) {
 		activo,
 	};
 
-	if (password && password.trim().length >= 6) {
+	if (password && password.trim().length >= 8) {
 		updateData.password = await bcrypt.hash(password.trim(), 10);
 	}
 

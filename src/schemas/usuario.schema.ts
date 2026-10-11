@@ -29,7 +29,7 @@ export const crearUsuarioSchema = z.object({
 		.max(150, 'El correo no puede exceder 150 caracteres'),
 	password: z
 		.string()
-		.min(6, 'La contraseña debe tener al menos 6 caracteres')
+		.min(8, 'La contraseña debe tener al menos 8 caracteres')
 		.max(100, 'La contraseña no puede exceder 100 caracteres'),
 	rol: rolEnum,
 	departamentoId: z
@@ -63,8 +63,8 @@ export const editarUsuarioSchema = z.object({
 	password: z
 		.string()
 		.optional()
-		.refine((val) => !val || val.length >= 6, {
-			message: 'La nueva contraseña debe tener al menos 6 caracteres',
+		.refine((val) => !val || val.length >= 8, {
+			message: 'La nueva contraseña debe tener al menos 8 caracteres',
 		}),
 	rol: rolEnum,
 	departamentoId: z
@@ -106,10 +106,10 @@ export const usuarioFormSchema = z
 	})
 	.superRefine((data, ctx) => {
 		if (!data.id) {
-			if (!data.password || data.password.length < 6) {
+			if (!data.password || data.password.length < 8) {
 				ctx.addIssue({
 					code: 'custom',
-					message: 'La contraseña debe tener al menos 6 caracteres',
+					message: 'La contraseña debe tener al menos 8 caracteres',
 					path: ['password'],
 				});
 			}
@@ -117,11 +117,11 @@ export const usuarioFormSchema = z
 			if (
 				data.password &&
 				data.password.length > 0 &&
-				data.password.length < 6
+				data.password.length < 8
 			) {
 				ctx.addIssue({
 					code: 'custom',
-					message: 'La nueva contraseña debe tener al menos 6 caracteres',
+					message: 'La nueva contraseña debe tener al menos 8 caracteres',
 					path: ['password'],
 				});
 			}

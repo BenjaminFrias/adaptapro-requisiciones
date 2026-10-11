@@ -76,6 +76,7 @@ export function UsuarioModal({
 		if (isPending) return;
 		setServerError(null);
 		setShowPassword(false);
+		form.reset();
 		onClose();
 	};
 
@@ -324,7 +325,7 @@ export function UsuarioModal({
 							<Input
 								type={showPassword ? 'text' : 'password'}
 								placeholder={
-									isEditing ? '•••••••• (Sin cambios)' : 'Mínimo 6 caracteres'
+									isEditing ? '•••••••• (Sin cambios)' : 'Mínimo 8 caracteres'
 								}
 								{...form.register('password')}
 								className="h-10 pr-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700"

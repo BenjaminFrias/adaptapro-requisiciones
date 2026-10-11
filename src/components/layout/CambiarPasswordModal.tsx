@@ -199,7 +199,7 @@ export function CambiarPasswordModal({
 									Nueva Contraseña *
 								</Label>
 								<span className="text-[10px] text-slate-400">
-									Mínimo 6 caracteres
+									Mínimo 8 caracteres
 								</span>
 							</div>
 							<div className="relative">
