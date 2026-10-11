@@ -2,7 +2,11 @@
 
 import { signIn, signOut, auth, InactiveUserError } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { changePasswordSchema, loginSchema } from '@/schemas/auth.schema';
+import {
+	changePasswordSchema,
+	loginSchema,
+	type ChangePasswordInput,
+} from '@/schemas/auth.schema';
 import bcrypt from 'bcryptjs';
 import { AuthError } from 'next-auth';
 
@@ -73,7 +77,9 @@ export async function logoutAction() {
 	await signOut({ redirectTo: '/login' });
 }
 
-export async function changePasswordAction(formData: FormData) {
+export async function changePasswordAction(
+	inputOrFormData: FormData | ChangePasswordInput,
+) {
 	const session = await auth();
 
 	if (!session?.user) {
@@ -83,9 +89,16 @@ export async function changePasswordAction(formData: FormData) {
 		};
 	}
 
-	const currentPassword = formData.get('currentPassword') as string;
-	const newPassword = formData.get('newPassword') as string;
-	const confirmPassword = formData.get('confirmPassword') as string;
+	const isFormData = inputOrFormData instanceof FormData;
+	const currentPassword = isFormData
+		? (inputOrFormData.get('currentPassword') as string)
+		: inputOrFormData.currentPassword;
+	const newPassword = isFormData
+		? (inputOrFormData.get('newPassword') as string)
+		: inputOrFormData.newPassword;
+	const confirmPassword = isFormData
+		? (inputOrFormData.get('confirmPassword') as string)
+		: inputOrFormData.confirmPassword;
 
 	const validation = changePasswordSchema.safeParse({
 		currentPassword,
