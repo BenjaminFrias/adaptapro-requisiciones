@@ -10,7 +10,6 @@ import {
 	ChevronDown,
 	Menu,
 	X,
-	Sparkles,
 	KeyRound,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -115,7 +114,7 @@ export function Navbar({ user }: NavbarProps) {
 			case 'COMPRAS':
 				return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800';
 			default:
-				return 'bg-[#301996]/10 text-[#301996] border-[#301996]/20 dark:bg-[#301996]/25 dark:text-purple-300 dark:border-[#301996]/30';
+				return 'bg-[#035786]/10 text-[#035786] border-[#035786]/20 dark:bg-[#035786]/25 dark:text-blue-300 dark:border-[#035786]/30';
 		}
 	};
 
@@ -141,23 +140,23 @@ export function Navbar({ user }: NavbarProps) {
 
 	return (
 		<>
-			{/* Barra Superior Flotante Estilo Cápsula */}
-			<header className="sticky top-0 z-40 w-full pt-3 sm:pt-4 px-3 sm:px-6 lg:px-8 bg-transparent transition-all">
-				<div className="max-w-7xl mx-auto w-full">
-					<nav className="bg-white/95 dark:bg-[#16161a]/95 backdrop-blur-md rounded-2xl sm:rounded-full border border-slate-200/80 dark:border-zinc-800/80 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.04)] px-3.5 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-3 transition-all">
+			{/* Barra Superior Sólida de Extremo a Extremo */}
+			<header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-zinc-800 bg-white/95 dark:bg-[#121214]/95 backdrop-blur-md transition-all">
+				<div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+					<nav className="h-14 sm:h-16 flex items-center justify-between gap-4">
 						{/* Logo y Marca AdaptaPro a la izquierda */}
-						<div className="flex items-center gap-2 sm:gap-3 shrink-0">
+						<div className="flex items-center gap-3 shrink-0">
 							<Link
 								href="/dashboard"
 								className="flex items-center gap-2.5 sm:gap-3 group"
 								aria-label="Ir al Inicio"
 							>
-								{/* Ícono circular distintivo con el color azul del logo y versión icono blanca */}
-								<div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#035786] flex items-center justify-center p-1.5 shadow-sm shadow-[#035786]/20 group-hover:scale-105 transition-transform shrink-0">
+								{/* Ícono con el color azul corporativo #035786 */}
+								<div className="w-8 h-8 rounded-md bg-[#035786] flex items-center justify-center p-1.5 transition-opacity group-hover:opacity-90 shrink-0">
 									<Image
 										src="/brand/logo-icono-white.svg"
 										alt="AdaptaPro Ícono"
-										width={24}
+										width={22}
 										height={18}
 										className="w-full h-auto object-contain"
 										priority
@@ -168,31 +167,35 @@ export function Navbar({ user }: NavbarProps) {
 								<Image
 									src="/brand/logo-full-blue.svg"
 									alt="AdaptaPro"
-									width={130}
-									height={30}
-									className="h-6 sm:h-7 w-auto object-contain shrink-0 group-hover:opacity-90 transition-opacity"
+									width={125}
+									height={28}
+									className="h-6 sm:h-6.5 w-auto object-contain shrink-0 group-hover:opacity-90 transition-opacity"
 									priority
 								/>
 							</Link>
 						</div>
 
-						{/* Navegación Central en Cápsula / Pill Segmented Control */}
-						<div className="hidden md:flex items-center bg-slate-100/90 dark:bg-zinc-800/80 p-1 rounded-full border border-slate-200/50 dark:border-zinc-700/50 shadow-inner">
+						{/* Navegación Central Horizontal Limpia */}
+						<div className="hidden md:flex items-center gap-1">
 							{navItems.map((item) => {
 								const isActive =
 									pathname === item.href ||
-									(item.href !== '/dashboard' && pathname.startsWith(item.href));
+									(item.href !== '/dashboard' &&
+										pathname.startsWith(item.href));
 								return (
 									<Link
 										key={item.href}
 										href={item.href}
-										className={`px-4 sm:px-5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all ${
+										className={`relative px-3 py-1.5 rounded-md text-sm transition-colors ${
 											isActive
-												? 'bg-white dark:bg-zinc-900 text-slate-900 dark:text-white font-semibold shadow-xs'
-												: 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-white/60 dark:hover:bg-zinc-700/60'
+												? 'text-[#035786] dark:text-blue-400 font-semibold'
+												: 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-zinc-800/60 font-medium'
 										}`}
 									>
 										{item.name}
+										{isActive && (
+											<span className="absolute bottom-0 left-3 right-3 h-0.5 bg-[#035786] dark:bg-blue-400 rounded-full" />
+										)}
 									</Link>
 								);
 							})}
@@ -203,31 +206,28 @@ export function Navbar({ user }: NavbarProps) {
 							{/* Botón de Búsqueda */}
 							<button
 								onClick={() => setIsSearchOpen(true)}
-								className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors cursor-pointer"
-								title="Buscar requisición (Ctrl+K)"
+								className="h-9 px-3.5 rounded-md flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 hover:bg-slate-50 dark:hover:text-white bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors cursor-pointer text-xs font-medium"
+								title="Buscar requisición"
 								aria-label="Buscar"
 							>
 								<Search className="w-4 h-4" />
+								<span className="hidden lg:inline text-slate-400">
+									Buscar...
+								</span>
 							</button>
 
 							{/* Componente Modular de Notificaciones */}
 							<NotificationDropdown />
 
-							{/* Perfil del Usuario con Avatar Circular y Dropdown */}
+							{/* Perfil del Usuario con Avatar y Dropdown */}
 							<div className="relative" ref={profileRef}>
 								<button
 									onClick={() => setIsProfileOpen((prev) => !prev)}
-									className="flex items-center gap-1.5 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors cursor-pointer"
+									className="flex items-center gap-1.5 p-1 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-colors cursor-pointer"
 									aria-label="Menú de perfil"
 								>
-									{/* Avatar circular con gradiente corporativo */}
-									<div
-										className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white shadow-xs ring-2 ring-slate-100 dark:ring-zinc-800 shrink-0"
-										style={{
-											background:
-												'linear-gradient(135deg, #301996 0%, #2563eb 60%, #38bdf8 100%)',
-										}}
-									>
+									{/* Avatar con azul corporativo plano */}
+									<div className="w-8 h-8 rounded-md bg-[#035786] flex items-center justify-center font-semibold text-xs text-white shrink-0">
 										{getInitials(user.nombre)}
 									</div>
 									<ChevronDown
@@ -239,20 +239,14 @@ export function Navbar({ user }: NavbarProps) {
 
 								{/* Dropdown de Perfil de Usuario */}
 								{isProfileOpen && (
-									<div className="absolute right-0 mt-3 w-72 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-slate-200/80 dark:border-zinc-800 p-4 z-50 animate-in fade-in-0 zoom-in-95 duration-150">
+									<div className="absolute right-0 mt-2 w-72 bg-white dark:bg-zinc-900 rounded-md border border-slate-200/80 dark:border-zinc-800 p-4 z-50 animate-in fade-in-0 duration-150">
 										{/* Encabezado del perfil */}
 										<div className="flex items-start gap-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
-											<div
-												className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 shadow-sm"
-												style={{
-													background:
-														'linear-gradient(135deg, #301996 0%, #2563eb 60%, #38bdf8 100%)',
-												}}
-											>
+											<div className="w-10 h-10 rounded-md bg-[#035786] flex items-center justify-center font-semibold text-sm text-white shrink-0">
 												{getInitials(user.nombre)}
 											</div>
 											<div className="min-w-0 flex-1">
-												<h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+												<h4 className="text-sm font-semibold text-slate-900 dark:text-white truncate">
 													{user.nombre}
 												</h4>
 												<p className="text-xs text-slate-400 truncate">
@@ -260,7 +254,7 @@ export function Navbar({ user }: NavbarProps) {
 												</p>
 												<div className="flex items-center gap-1.5 mt-1.5">
 													<span
-														className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${getRoleBadgeClass(
+														className={`text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-md border ${getRoleBadgeClass(
 															user.rol,
 														)}`}
 													>
@@ -273,7 +267,9 @@ export function Navbar({ user }: NavbarProps) {
 										{/* Información de Departamento */}
 										<div className="py-2.5 text-xs text-slate-600 dark:text-slate-400 flex items-center gap-2">
 											<Building2 className="w-4 h-4 text-slate-400 shrink-0" />
-											<span className="truncate">{user.departamentoNombre}</span>
+											<span className="truncate">
+												{user.departamentoNombre}
+											</span>
 										</div>
 
 										{/* Seguridad / Cambiar Contraseña */}
@@ -284,9 +280,9 @@ export function Navbar({ user }: NavbarProps) {
 													setIsProfileOpen(false);
 													setIsChangePasswordOpen(true);
 												}}
-												className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+												className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
 											>
-												<KeyRound className="w-3.5 h-3.5 text-[#301996] dark:text-blue-400" />
+												<KeyRound className="w-3.5 h-3.5 text-[#035786] dark:text-blue-400" />
 												<span>Cambiar Contraseña</span>
 											</button>
 										</div>
@@ -298,7 +294,7 @@ export function Navbar({ user }: NavbarProps) {
 												size="sm"
 												onClick={handleLogout}
 												disabled={isPending}
-												className="w-full justify-start text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl h-8.5 gap-2"
+												className="w-full justify-start text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-md h-8.5 gap-2"
 											>
 												<LogOut className="w-3.5 h-3.5" />
 												<span>Cerrar Sesión</span>
@@ -311,7 +307,7 @@ export function Navbar({ user }: NavbarProps) {
 							{/* Botón Menú Móvil */}
 							<button
 								onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-								className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors ml-1"
+								className="md:hidden w-9 h-9 rounded-md flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors ml-1"
 								aria-label="Abrir navegación móvil"
 							>
 								{isMobileMenuOpen ? (
@@ -325,20 +321,21 @@ export function Navbar({ user }: NavbarProps) {
 
 					{/* Menú Desplegable Móvil */}
 					{isMobileMenuOpen && (
-						<div className="md:hidden mt-2 bg-white/95 dark:bg-[#16161a]/95 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-lg p-3 space-y-1 animate-in fade-in-0 duration-150">
+						<div className="md:hidden py-2 border-t border-slate-100 dark:border-zinc-800 space-y-1 animate-in fade-in-0 duration-150">
 							{navItems.map((item) => {
 								const isActive =
 									pathname === item.href ||
-									(item.href !== '/dashboard' && pathname.startsWith(item.href));
+									(item.href !== '/dashboard' &&
+										pathname.startsWith(item.href));
 								return (
 									<Link
 										key={item.href}
 										href={item.href}
 										onClick={() => setIsMobileMenuOpen(false)}
-										className={`block px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+										className={`block px-3 py-2 rounded-md text-sm transition-colors ${
 											isActive
-												? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
-												: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-zinc-800'
+												? 'text-[#035786] dark:text-blue-400 font-semibold'
+												: 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-white dark:hover:bg-zinc-800 font-medium'
 										}`}
 									>
 										{item.name}
@@ -355,7 +352,7 @@ export function Navbar({ user }: NavbarProps) {
 				<div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-20 px-4 animate-in fade-in-0 duration-150">
 					<div
 						ref={searchModalRef}
-						className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden"
+						className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-md border border-slate-200 dark:border-zinc-800 overflow-hidden"
 					>
 						<form onSubmit={handleSearchSubmit} className="relative">
 							<div className="flex items-center px-4 border-b border-slate-100 dark:border-zinc-800">
@@ -364,7 +361,7 @@ export function Navbar({ user }: NavbarProps) {
 									type="text"
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
-									placeholder="Buscar requisición por código, motivo o proveedor..."
+									placeholder="Buscar requisición por código o proveedor..."
 									autoFocus
 									className="w-full py-3.5 px-3 bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
 								/>
@@ -380,10 +377,8 @@ export function Navbar({ user }: NavbarProps) {
 
 						<div className="p-3 text-xs text-slate-400 flex items-center justify-between">
 							<span className="flex items-center gap-1.5">
-								<Sparkles className="w-3.5 h-3.5 text-[#301996] dark:text-blue-400" />
 								Presiona Enter para filtrar en el Dashboard
 							</span>
-							<span className="text-[11px] font-mono">AdaptaPro Search</span>
 						</div>
 					</div>
 				</div>

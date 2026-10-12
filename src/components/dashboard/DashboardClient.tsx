@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { cn } from 'cn';
 import { Navbar } from '@/components/layout/Navbar';
 import { RequisicionesList } from '@/components/requisiciones/RequisicionesList';
 import { RequisicionForm } from '@/components/requisiciones/RequisicionForm';
@@ -12,14 +13,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import {
-	Plus,
-	FileText,
-	CheckCircle2,
-	Clock,
-	FileEdit,
-	Sparkles,
-} from 'lucide-react';
+import { Plus, FileText, CheckCircle2, Clock, FileEdit } from 'lucide-react';
 import type { RequisicionConRelaciones } from '@/types/requisicion';
 
 interface DashboardClientProps {
@@ -34,7 +28,8 @@ interface DashboardClientProps {
 
 export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 	const [openCrear, setOpenCrear] = useState(false);
-	const [reqParaEditar, setReqParaEditar] = useState<RequisicionConRelaciones | null>(null);
+	const [reqParaEditar, setReqParaEditar] =
+		useState<RequisicionConRelaciones | null>(null);
 
 	// Métricas rápidas
 	const total = requisiciones.length;
@@ -51,6 +46,41 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 		(r) => r.estado === 'BORRADOR' || r.estado === 'DEVUELTA',
 	).length;
 
+	const kpiCards = [
+		{
+			id: 'total',
+			titulo: 'Total registradas',
+			valor: total,
+			subtitulo: 'Histórico de solicitudes',
+			icon: FileText,
+			destacado: true,
+		},
+		{
+			id: 'pendientes',
+			titulo: 'En aprobación',
+			valor: pendientes,
+			subtitulo: 'En espera de firma o revisión',
+			icon: Clock,
+			destacado: false,
+		},
+		{
+			id: 'aprobadas',
+			titulo: 'Aprobadas / En proceso',
+			valor: aprobadas,
+			subtitulo: 'Procesándose en compras',
+			icon: CheckCircle2,
+			destacado: false,
+		},
+		{
+			id: 'borradores',
+			titulo: 'Borrador / Devueltas',
+			valor: borradores,
+			subtitulo: 'Requieren tu envío o ajuste',
+			icon: FileEdit,
+			destacado: false,
+		},
+	];
+
 	return (
 		<div className="min-h-screen bg-[#fafafc] dark:bg-[#0e0e11] flex flex-col antialiased">
 			{/* Barra de navegación superior fija */}
@@ -59,113 +89,88 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 			{/* Contenedor principal */}
 			<main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
 				{/* Encabezado y Acción Principal */}
-				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
-					<div className="space-y-1">
-						<div className="flex items-center gap-2">
-							<span className="text-[11px] font-bold uppercase tracking-wider text-[#301996] dark:text-[#6a9bcc] flex items-center gap-1">
-								<Sparkles className="w-3 h-3 inline" />
-								Panel de Solicitudes
-							</span>
-						</div>
-						<h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-							Mis Requisiciones
+				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+					<div>
+						<h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+							Mis requisiciones
 						</h1>
-						<p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl">
+						<p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
 							Consulta, gestiona y haz seguimiento a tus solicitudes internas de
 							bienes y servicios en tiempo real.
 						</p>
 					</div>
 
 					<Button
+						size="lg"
 						onClick={() => setOpenCrear(true)}
-						className="h-10 px-4 rounded-xl bg-[#301996] hover:bg-[#25137a] text-white font-medium text-xs sm:text-sm gap-2 shadow-md shadow-[#301996]/25 hover:shadow-lg hover:shadow-[#301996]/35 active:scale-[0.98] transition-all shrink-0 self-start sm:self-auto"
+						className="shrink-0 self-start sm:self-auto"
 					>
-						<Plus className="w-4 h-4 stroke-[2.5]" />
-						Nueva Requisición
+						<Plus className="w-4 h-4" />
+						Nueva requisición
 					</Button>
 				</div>
 
 				{/* Tarjetas KPI de Métricas Principales */}
 				<div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-					{/* KPI 1: Total Creadas */}
-					<div className="group relative p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
-						<div className="flex items-center justify-between gap-3 mb-2 sm:mb-3">
-							<span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-								Total Registradas
-							</span>
-							<div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-								<FileText className="w-4.5 h-4.5" />
+					{kpiCards.map((kpi) => {
+						const Icon = kpi.icon;
+						return (
+							<div
+								key={kpi.id}
+								className={cn(
+									'p-3.5 sm:p-4 rounded-md border',
+									kpi.destacado
+										? 'bg-[#035786] text-white border-[#035786]'
+										: 'bg-white dark:bg-zinc-900 border-slate-200/80 dark:border-zinc-800',
+								)}
+							>
+								<div className="flex items-center justify-between gap-3 mb-2.5">
+									<span
+										className={cn(
+											'text-xs font-medium',
+											kpi.destacado
+												? 'text-white/80'
+												: 'text-slate-500 dark:text-slate-400',
+										)}
+									>
+										{kpi.titulo}
+									</span>
+									<div
+										className={cn(
+											'w-8 h-8 rounded-md flex items-center justify-center shrink-0',
+											kpi.destacado
+												? 'bg-white/15 text-white'
+												: 'bg-blue-50 dark:bg-blue-950/40 text-[#035786] dark:text-sky-400',
+										)}
+									>
+										<Icon className="w-4 h-4" />
+									</div>
+								</div>
+								<div>
+									<div
+										className={cn(
+											'text-3xl sm:text-5xl font-semibold tracking-tight',
+											kpi.destacado
+												? 'text-white'
+												: 'text-slate-900 dark:text-white',
+										)}
+									>
+										{kpi.valor}
+									</div>
+									<p
+										className={cn(
+											'text-xs truncate mt-0.5',
+											kpi.destacado
+												? 'text-white/75'
+												: 'text-slate-400 dark:text-slate-500',
+										)}
+									>
+										{kpi.subtitulo}
+									</p>
+								</div>
 							</div>
-						</div>
-						<div className="space-y-0.5">
-							<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-								{total}
-							</div>
-							<p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium truncate">
-								Histórico de solicitudes
-							</p>
-						</div>
-					</div>
-
-					{/* KPI 2: En Aprobación */}
-					<div className="group relative p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
-						<div className="flex items-center justify-between gap-3 mb-2 sm:mb-3">
-							<span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-								En Aprobación
-							</span>
-							<div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-								<Clock className="w-4.5 h-4.5" />
-							</div>
-						</div>
-						<div className="space-y-0.5">
-							<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-								{pendientes}
-							</div>
-							<p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium truncate">
-								En espera de firma o revisión
-							</p>
-						</div>
-					</div>
-
-					{/* KPI 3: Aprobadas / En Proceso */}
-					<div className="group relative p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
-						<div className="flex items-center justify-between gap-3 mb-2 sm:mb-3">
-							<span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-								Aprobadas / Proceso
-							</span>
-							<div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-								<CheckCircle2 className="w-4.5 h-4.5" />
-							</div>
-						</div>
-						<div className="space-y-0.5">
-							<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-								{aprobadas}
-							</div>
-							<p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate">
-								Procesándose en compras
-							</p>
-						</div>
-					</div>
-
-					{/* KPI 4: Borradores / Devueltas */}
-					<div className="group relative p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-zinc-700 transition-all">
-						<div className="flex items-center justify-between gap-3 mb-2 sm:mb-3">
-							<span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-								Borrador / Devueltas
-							</span>
-							<div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-[#301996] dark:text-purple-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-								<FileEdit className="w-4.5 h-4.5" />
-							</div>
-						</div>
-						<div className="space-y-0.5">
-							<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-								{borradores}
-							</div>
-							<p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium truncate">
-								Requieren tu envío o ajuste
-							</p>
-						</div>
-					</div>
+						);
+					})}
 				</div>
 
 				{/* Listado con filtros y tabla */}
@@ -206,7 +211,7 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 													reqParaEditar.numero
 														? reqParaEditar.numero
 														: `(Borrador #${reqParaEditar.id})`
-											  }`
+												}`
 											: 'Crear Nueva Requisición'}
 									</DialogTitle>
 									<p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

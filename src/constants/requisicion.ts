@@ -11,11 +11,11 @@ export interface EstadoFilterOption {
 export const ESTADO_REQUISICION_LABELS: Record<EstadoRequisicion | 'TODOS', string> = {
 	TODOS: 'Todos los estados',
 	BORRADOR: 'Borrador',
-	PENDIENTE_APROBACION: 'En Aprobación',
+	PENDIENTE_APROBACION: 'En aprobación',
 	DEVUELTA: 'Devuelta',
 	RECHAZADA: 'Rechazada',
 	APROBADA: 'Aprobada',
-	EN_COMPRA: 'En Compra',
+	EN_COMPRA: 'En compra',
 	ATENDIDA: 'Atendida',
 	CANCELADA: 'Cancelada',
 };
