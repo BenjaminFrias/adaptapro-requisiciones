@@ -6,6 +6,7 @@ import { cn } from 'cn';
 import { Navbar } from '@/components/layout/Navbar';
 import { RequisicionesList } from '@/components/requisiciones/RequisicionesList';
 import { RequisicionForm } from '@/components/requisiciones/RequisicionForm';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -89,17 +90,10 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 			{/* Contenedor principal */}
 			<main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
 				{/* Encabezado y Acción Principal */}
-				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-					<div>
-						<h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
-							Mis requisiciones
-						</h1>
-						<p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
-							Consulta, gestiona y haz seguimiento a tus solicitudes internas de
-							bienes y servicios en tiempo real.
-						</p>
-					</div>
-
+				<PageHeader
+					title="Mis requisiciones"
+					description="Consulta, gestiona y haz seguimiento a tus solicitudes internas de bienes y servicios en tiempo real."
+				>
 					<Button
 						size="lg"
 						onClick={() => setOpenCrear(true)}
@@ -108,7 +102,7 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 						<Plus className="w-4 h-4" />
 						Nueva requisición
 					</Button>
-				</div>
+				</PageHeader>
 
 				{/* Tarjetas KPI de Métricas Principales */}
 				<div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">

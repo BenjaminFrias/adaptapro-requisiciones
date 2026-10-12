@@ -127,29 +127,18 @@ export function RequisicionesAdminTab({
 
 	return (
 		<div className="space-y-6">
-			{/* Botón flotante/superior de Exportar a CSV */}
-			<div className="flex justify-end">
-				<Button
-					onClick={handleExportCSV}
-					className="h-10 px-4 rounded-xl bg-[#301996] hover:bg-[#25137a] text-white font-medium text-xs sm:text-sm gap-2 shadow-sm"
-				>
-					<Download className="w-4 h-4" />
-					Exportar a CSV ({listaFiltradaReq.length})
-				</Button>
-			</div>
-
 			{/* 4 KPIs de Alto Nivel */}
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-				<div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+				<div className="p-4 sm:p-5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
 					<div className="flex items-center justify-between mb-2">
-						<span className="text-xs font-semibold text-slate-500">
+						<span className="text-xs font-medium text-slate-500 dark:text-zinc-400">
 							Total Requisiciones
 						</span>
-						<div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+						<div className="w-8 h-8 rounded-md bg-[#035786]/10 dark:bg-[#035786]/20 text-[#035786] dark:text-sky-400 flex items-center justify-center">
 							<FileText className="w-4 h-4" />
 						</div>
 					</div>
-					<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+					<div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
 						{metricas.totalRequisiciones}
 					</div>
 					<p className="text-[11px] text-slate-400 mt-0.5">
@@ -157,33 +146,33 @@ export function RequisicionesAdminTab({
 					</p>
 				</div>
 
-				<div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+				<div className="p-4 sm:p-5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
 					<div className="flex items-center justify-between mb-2">
-						<span className="text-xs font-semibold text-slate-500">
+						<span className="text-xs font-medium text-slate-500 dark:text-zinc-400">
 							Monto Compras Final
 						</span>
-						<div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+						<div className="w-8 h-8 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
 							<DollarSign className="w-4 h-4" />
 						</div>
 					</div>
-					<div className="text-xl sm:text-2xl font-extrabold font-mono text-slate-900 dark:text-white truncate">
+					<div className="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white truncate">
 						{formatMontoBs(metricas.totalMontoCompras, true)}
 					</div>
-					<p className="text-[11px] text-emerald-600 mt-0.5">
+					<p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">
 						Órdenes procesadas
 					</p>
 				</div>
 
-				<div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+				<div className="p-4 sm:p-5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
 					<div className="flex items-center justify-between mb-2">
-						<span className="text-xs font-semibold text-slate-500">
+						<span className="text-xs font-medium text-slate-500 dark:text-zinc-400">
 							Usuarios Activos
 						</span>
-						<div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+						<div className="w-8 h-8 rounded-md bg-sky-50 dark:bg-sky-950/40 text-[#035786] dark:text-sky-400 flex items-center justify-center">
 							<Users className="w-4 h-4" />
 						</div>
 					</div>
-					<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+					<div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
 						{metricas.totalUsuarios}
 					</div>
 					<p className="text-[11px] text-slate-400 mt-0.5">
@@ -191,16 +180,16 @@ export function RequisicionesAdminTab({
 					</p>
 				</div>
 
-				<div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
+				<div className="p-4 sm:p-5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 shadow-xs">
 					<div className="flex items-center justify-between mb-2">
-						<span className="text-xs font-semibold text-slate-500">
+						<span className="text-xs font-medium text-slate-500 dark:text-zinc-400">
 							Departamentos
 						</span>
-						<div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+						<div className="w-8 h-8 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
 							<Building className="w-4 h-4" />
 						</div>
 					</div>
-					<div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+					<div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
 						{metricas.totalDepartamentos}
 					</div>
 					<p className="text-[11px] text-slate-400 mt-0.5">Áreas funcionales</p>
@@ -209,145 +198,150 @@ export function RequisicionesAdminTab({
 
 			{/* Tarjetas de Distribución por Estado */}
 			<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 text-xs">
-				<div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/70 text-amber-900">
-					<span className="font-semibold block text-[10px] uppercase">
+				<div className="p-3 rounded-md bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-900/50 text-amber-900 dark:text-amber-300">
+					<span className="font-medium block text-[10px] uppercase">
 						En Aprobación
 					</span>
 					<span className="text-xl font-bold">{contadores.pendientes}</span>
 				</div>
-				<div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/70 text-emerald-900">
-					<span className="font-semibold block text-[10px] uppercase">
+				<div className="p-3 rounded-md bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-900/50 text-emerald-900 dark:text-emerald-300">
+					<span className="font-medium block text-[10px] uppercase">
 						Aprobadas
 					</span>
 					<span className="text-xl font-bold">{contadores.aprobadas}</span>
 				</div>
-				<div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/70 text-blue-900">
-					<span className="font-semibold block text-[10px] uppercase">
+				<div className="p-3 rounded-md bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-900/50 text-sky-900 dark:text-sky-300">
+					<span className="font-medium block text-[10px] uppercase">
 						En Compra
 					</span>
 					<span className="text-xl font-bold">{contadores.enCompra}</span>
 				</div>
-				<div className="p-3 rounded-xl bg-purple-50/70 border border-purple-200/70 text-purple-900">
-					<span className="font-semibold block text-[10px] uppercase">
+				<div className="p-3 rounded-md bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/70 dark:border-purple-900/50 text-purple-900 dark:text-purple-300">
+					<span className="font-medium block text-[10px] uppercase">
 						Atendidas
 					</span>
 					<span className="text-xl font-bold">{contadores.atendidas}</span>
 				</div>
-				<div className="p-3 rounded-xl bg-rose-50/70 border border-rose-200/70 text-rose-900">
-					<span className="font-semibold block text-[10px] uppercase">
+				<div className="p-3 rounded-md bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/70 dark:border-rose-900/50 text-rose-900 dark:text-rose-300">
+					<span className="font-medium block text-[10px] uppercase">
 						Rechazadas
 					</span>
 					<span className="text-xl font-bold">{contadores.rechazadas}</span>
 				</div>
-				<div className="p-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-700">
-					<span className="font-semibold block text-[10px] uppercase">
+				<div className="p-3 rounded-md bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-slate-300">
+					<span className="font-medium block text-[10px] uppercase">
 						Canceladas
 					</span>
 					<span className="text-xl font-bold">{contadores.canceladas}</span>
 				</div>
 			</div>
 
-			{/* Barra de Filtros, Búsqueda y Selectores */}
-			<div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-xs flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
-				<div className="relative flex-1 max-w-md">
-					<Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-					<Input
-						placeholder="Buscar por correlativo, usuario, proveedor..."
-						value={busqueda}
-						onChange={(e) => setBusqueda(e.target.value)}
-						className="pl-9.5 pr-8 h-10 text-xs sm:text-sm bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus-visible:ring-[#301996]/20 focus-visible:border-[#301996]"
-					/>
-					{busqueda && (
-						<button
-							type="button"
-							onClick={() => setBusqueda('')}
-							className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-							aria-label="Limpiar búsqueda"
-						>
-							<X className="w-3.5 h-3.5" />
-						</button>
-					)}
-				</div>
+			{/* Tabla General de Requisiciones del Sistema con Cabecera Integrada */}
+			<div className="rounded-md border border-slate-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+				{/* Cabecera integrada: Filtros a la izquierda + Buscador y Exportar CSV a la derecha (todo en 1 línea) */}
+				<div className="p-2 sm:px-3 sm:py-2.5 border-b border-slate-200/80 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-2.5 bg-white dark:bg-zinc-900">
+					{/* Filtros por Departamento y Estado */}
+					<div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+						<div className="w-full sm:w-44 shrink-0">
+							<Select
+								value={filtroDepto}
+								onValueChange={(val) => setFiltroDepto(val || 'TODOS')}
+							>
+								<SelectTrigger size="sm" className="h-8.5 w-full text-xs bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700/80 rounded-md focus:ring-[#035786]/20 px-2.5">
+									<SelectValue placeholder="Todos los dptos.">
+										{(val) =>
+											val === 'TODOS' || !val ? 'Todos los dptos.' : val
+										}
+									</SelectValue>
+								</SelectTrigger>
+								<SelectContent className="rounded-md border-slate-200 dark:border-zinc-800">
+									<SelectItem value="TODOS">Todos los dptos.</SelectItem>
+									{departamentosReq.map((d) => (
+										<SelectItem key={d} value={d}>
+											{d}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
 
-				<div className="flex flex-col sm:flex-row sm:items-center gap-3">
-					{/* Filtro por Departamento */}
-					<div className="flex items-center gap-2">
-						<span className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
-							Departamento:
-						</span>
-						<Select
-							value={filtroDepto}
-							onValueChange={(val) => setFiltroDepto(val || 'TODOS')}
-						>
-							<SelectTrigger className="h-10.5 min-w-44 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus:ring-[#301996]/20 px-3.5">
-								<SelectValue placeholder="Todos los dptos.">
-									{(val) =>
-										val === 'TODOS' || !val ? 'Todos los dptos.' : val
-									}
-								</SelectValue>
-							</SelectTrigger>
-							<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
-								<SelectItem value="TODOS">Todos los dptos.</SelectItem>
-								{departamentosReq.map((d) => (
-									<SelectItem key={d} value={d}>
-										{d}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+						<div className="w-full sm:w-40 shrink-0">
+							<Select
+								items={ESTADOS_FILTRO_ADMIN}
+								value={filtroEstado}
+								onValueChange={(val) => setFiltroEstado(val || 'TODOS')}
+							>
+								<SelectTrigger size="sm" className="h-8.5 w-full text-xs bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700/80 rounded-md focus:ring-[#035786]/20 px-2.5">
+									<SelectValue placeholder="Todos los estados">
+										{(val) => getEstadoLabel(val) || 'Todos los estados'}
+									</SelectValue>
+								</SelectTrigger>
+								<SelectContent className="rounded-md border-slate-200 dark:border-zinc-800">
+									{ESTADOS_FILTRO_ADMIN.map((item) => (
+										<SelectItem key={item.value} value={item.value}>
+											{item.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
 
-					{/* Filtro por Estado */}
-					<div className="flex items-center gap-2">
-						<span className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
-							Estado:
-						</span>
-						<Select
-							items={ESTADOS_FILTRO_ADMIN}
-							value={filtroEstado}
-							onValueChange={(val) => setFiltroEstado(val || 'TODOS')}
+					{/* Búsqueda compacta y Botón Exportar CSV (azul default) */}
+					<div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+						<div className="relative w-full sm:w-60 shrink-0">
+							<Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+							<Input
+								placeholder="Buscar correlativo, usuario..."
+								value={busqueda}
+								onChange={(e) => setBusqueda(e.target.value)}
+								className="h-8.5 pl-8 pr-7 text-xs bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700/80 rounded-md focus-visible:bg-white focus-visible:border-[#035786]"
+							/>
+							{busqueda && (
+								<button
+									type="button"
+									onClick={() => setBusqueda('')}
+									className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+									aria-label="Limpiar búsqueda"
+								>
+									<X className="w-3 h-3" />
+								</button>
+							)}
+						</div>
+
+						<Button
+							size="sm"
+							onClick={handleExportCSV}
+							className="h-8.5 px-3 rounded-md text-xs font-semibold gap-1.5 shrink-0 shadow-xs"
 						>
-							<SelectTrigger className="h-10.5 min-w-44 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus:ring-[#301996]/20 px-3.5">
-								<SelectValue placeholder="Todos los estados">
-									{(val) => getEstadoLabel(val) || 'Todos los estados'}
-								</SelectValue>
-							</SelectTrigger>
-							<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
-								{ESTADOS_FILTRO_ADMIN.map((item) => (
-									<SelectItem key={item.value} value={item.value}>
-										{item.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+							<Download className="w-3.5 h-3.5" />
+							<span>Exportar CSV</span>
+						</Button>
 					</div>
 				</div>
-			</div>
 
-			{/* Tabla General de Requisiciones del Sistema */}
-			<div className="rounded-2xl border border-slate-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 overflow-hidden shadow-xs">
 				<Table>
-					<TableHeader className="bg-slate-50/80 dark:bg-zinc-800/60 border-b border-slate-200/80 dark:border-zinc-800">
+					<TableHeader className="bg-slate-50/75 dark:bg-zinc-800/60 border-b border-slate-200/80 dark:border-zinc-800">
 						<TableRow className="hover:bg-transparent">
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5 pl-5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3 pl-5">
 								Correlativo
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3">
 								Solicitante / Dpto.
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5">
-								Tipo / Prioridad
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3">
+								Tipo / prioridad
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3">
 								Fecha
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3">
 								Items
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3">
 								Estado
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5 text-right pr-5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3 text-right pr-5">
 								Acciones
 							</TableHead>
 						</TableRow>
@@ -367,14 +361,23 @@ export function RequisicionesAdminTab({
 							paginatedItems.map((req) => (
 								<TableRow
 									key={req.id}
-									className="hover:bg-slate-50/60 border-b border-slate-100"
+									onClick={() => setSelectedReq(req)}
+									className="cursor-pointer hover:bg-slate-50/80 dark:hover:bg-zinc-800/50 transition-colors border-b border-slate-100 dark:border-zinc-800/70 group"
 								>
-									<TableCell className="py-3.5 pl-5 font-mono font-bold text-xs text-[#301996]">
-										{req.numero || `Borrador #${req.id}`}
+									<TableCell className="py-3 pl-5">
+										{req.numero ? (
+											<span className="font-mono font-medium text-xs text-[#035786] dark:text-sky-400 bg-[#035786]/10 dark:bg-[#035786]/20 px-2 py-0.5 rounded-md border border-[#035786]/20">
+												{req.numero}
+											</span>
+										) : (
+											<span className="text-slate-500 font-normal italic text-xs bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md border border-slate-200/60">
+												Borrador #{req.id}
+											</span>
+										)}
 									</TableCell>
 
-									<TableCell className="py-3.5 text-xs">
-										<div className="font-semibold text-slate-800">
+									<TableCell className="py-3 text-xs">
+										<div className="font-medium text-slate-800 dark:text-slate-200">
 											{req.solicitante?.nombre || 'N/A'}
 										</div>
 										<span className="text-[11px] text-slate-400">
@@ -382,37 +385,46 @@ export function RequisicionesAdminTab({
 										</span>
 									</TableCell>
 
-									<TableCell className="py-3.5 text-xs">
-										<span>{req.tipo === 'BIEN' ? 'Bien' : 'Servicio'}</span>
-										{req.prioridad === 'URGENTE' && (
-											<span className="ml-1 text-[10px] font-bold text-red-600 bg-red-50 px-1 py-0.5 rounded">
-												Urgente
+									<TableCell className="py-3 text-xs">
+										<div className="flex items-center gap-1.5 flex-wrap">
+											<span className="font-medium text-slate-700 dark:text-slate-300">
+												{req.tipo === 'BIEN' ? 'Bien' : 'Servicio'}
 											</span>
-										)}
+											{req.prioridad === 'URGENTE' && (
+												<span className="inline-flex items-center text-[10px] font-medium text-red-600 bg-red-50 dark:bg-red-950/40 dark:text-red-400 px-1.5 py-0.5 rounded-md border border-red-200/80 dark:border-red-900/60">
+													Urgente
+												</span>
+											)}
+										</div>
 									</TableCell>
 
-									<TableCell className="py-3.5 text-xs text-slate-500 whitespace-nowrap">
+									<TableCell className="py-3 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
 										{new Date(req.fechaRequerida).toLocaleDateString(
 											'es-VE',
 											{ timeZone: 'UTC' },
 										)}
 									</TableCell>
 
-									<TableCell className="py-3.5 text-xs">
-										{req.items?.length || 0} ítems
+									<TableCell className="py-3 text-xs">
+										<span className="font-medium text-slate-700 dark:text-slate-300">
+											{req.items?.length || 0} ítems
+										</span>
 									</TableCell>
 
-									<TableCell className="py-3.5">
+									<TableCell className="py-3">
 										<EstadoBadge estado={req.estado} />
 									</TableCell>
 
-									<TableCell className="py-3.5 text-right pr-5">
+									<TableCell className="py-3 text-right pr-5">
 										<div className="flex items-center justify-end gap-1.5">
 											<Button
 												variant="ghost"
 												size="sm"
-												className="h-8 w-8 p-0 rounded-lg text-slate-500 hover:text-slate-900"
-												onClick={() => setSelectedReq(req)}
+												className="h-8 w-8 p-0 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+												onClick={(e) => {
+													e.stopPropagation();
+													setSelectedReq(req);
+												}}
 												title="Ver Detalle y Trazabilidad"
 											>
 												<Eye className="w-4 h-4" />
@@ -421,7 +433,8 @@ export function RequisicionesAdminTab({
 											<Link
 												href={`/requisiciones/${req.id}/imprimir`}
 												target="_blank"
-												className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-500 hover:text-[#301996] hover:bg-slate-100 transition-colors"
+												onClick={(e) => e.stopPropagation()}
+												className="inline-flex items-center justify-center h-8 w-8 rounded-md text-slate-400 hover:text-[#035786] dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
 												title="Comprobante Imprimible / PDF"
 											>
 												<Printer className="w-4 h-4" />
@@ -454,15 +467,15 @@ export function RequisicionesAdminTab({
 				open={!!selectedReq}
 				onOpenChange={(open) => !open && setSelectedReq(null)}
 			>
-				<DialogContent className="sm:max-w-2xl w-[95vw] max-w-2xl bg-white rounded-2xl p-0 overflow-hidden shadow-2xl">
-					<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 border-b border-slate-200">
+				<DialogContent className="sm:max-w-2xl w-[95vw] max-w-2xl bg-white dark:bg-zinc-900 rounded-lg p-0 overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800">
+					<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-800/50 border-b border-slate-200 dark:border-zinc-800">
 						<div className="flex items-center justify-between">
 							<div>
 								<DialogTitle className="text-base sm:text-lg font-bold">
 									Requisición:{' '}
 									{selectedReq?.numero || `Borrador #${selectedReq?.id}`}
 								</DialogTitle>
-								<p className="text-xs text-slate-500">
+								<p className="text-xs text-slate-500 dark:text-zinc-400">
 									Solicitante: {selectedReq?.solicitante?.nombre} (
 									{selectedReq?.departamento?.nombre})
 								</p>
@@ -474,22 +487,22 @@ export function RequisicionesAdminTab({
 					{selectedReq && (
 						<div className="p-5 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto">
 							<div className="space-y-1">
-								<span className="text-xs font-semibold text-slate-700 block">
+								<span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
 									Justificación
 								</span>
-								<p className="p-3 rounded-xl bg-slate-50 text-xs text-slate-700">
+								<p className="p-3 rounded-md bg-slate-50 dark:bg-zinc-800 text-xs text-slate-700 dark:text-slate-300">
 									{selectedReq.justificacion}
 								</p>
 							</div>
 
 							{/* Items */}
 							<div className="space-y-2">
-								<span className="text-xs font-semibold text-slate-700 block">
+								<span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
 									Artículos Solicitados
 								</span>
-								<div className="rounded-xl border border-slate-200 overflow-hidden">
+								<div className="rounded-md border border-slate-200 dark:border-zinc-800 overflow-hidden">
 									<table className="w-full text-left text-xs">
-										<thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase">
+										<thead className="bg-slate-50 dark:bg-zinc-800 text-[11px] font-medium text-slate-500 uppercase">
 											<tr>
 												<th className="p-2.5">Descripción</th>
 												<th className="p-2.5">Cant.</th>
@@ -497,7 +510,7 @@ export function RequisicionesAdminTab({
 												<th className="p-2.5 text-right">Costo Est.</th>
 											</tr>
 										</thead>
-										<tbody className="divide-y divide-slate-100">
+										<tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
 											{selectedReq.items?.map((item) => (
 												<tr key={item.id}>
 													<td className="p-2.5 font-medium">
@@ -522,8 +535,8 @@ export function RequisicionesAdminTab({
 
 							{/* Datos Compras */}
 							{selectedReq.comprasDatos && (
-								<div className="p-3.5 bg-blue-50/60 rounded-xl border border-blue-200/60 text-xs space-y-1">
-									<span className="font-bold text-blue-900 uppercase text-[10px]">
+								<div className="p-3.5 bg-sky-50/60 dark:bg-sky-950/20 rounded-md border border-sky-200/60 dark:border-sky-900/40 text-xs space-y-1">
+									<span className="font-semibold text-[#035786] dark:text-sky-400 uppercase text-[10px]">
 										Datos de Compra
 									</span>
 									<p>
@@ -544,17 +557,17 @@ export function RequisicionesAdminTab({
 
 							{/* Timeline */}
 							<div className="space-y-2 pt-2">
-								<span className="text-xs font-semibold text-slate-700 block">
+								<span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
 									Línea de Tiempo y Trazabilidad
 								</span>
 								<Timeline historial={selectedReq.historial} />
 							</div>
 
-							<div className="flex justify-between items-center pt-3 border-t border-slate-200">
+							<div className="flex justify-between items-center pt-3 border-t border-slate-200 dark:border-zinc-800">
 								<Link
 									href={`/requisiciones/${selectedReq.id}/imprimir`}
 									target="_blank"
-									className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#301996] hover:underline"
+									className="inline-flex items-center gap-1.5 text-xs font-medium text-[#035786] dark:text-sky-400 hover:underline"
 								>
 									<Printer className="w-3.5 h-3.5" />
 									Abrir Comprobante Imprimible
@@ -564,7 +577,7 @@ export function RequisicionesAdminTab({
 									type="button"
 									variant="outline"
 									onClick={() => setSelectedReq(null)}
-									className="text-xs h-9 rounded-xl"
+									className="text-xs h-8.5 rounded-md"
 								>
 									Cerrar
 								</Button>
