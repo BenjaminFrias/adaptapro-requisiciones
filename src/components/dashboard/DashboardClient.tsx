@@ -186,10 +186,10 @@ export function DashboardClient({ user, requisiciones }: DashboardClientProps) {
 						if (!val) setReqParaEditar(null);
 					}}
 				>
-					<DialogContent className="sm:max-w-4xl w-[96vw] max-w-4xl bg-white dark:bg-[#151518] border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
-						<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-900/70 border-b border-slate-200/80 dark:border-zinc-800">
+					<DialogContent className="sm:max-w-4xl w-[96vw] max-w-4xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-lg p-0 overflow-hidden shadow-2xl">
+						<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-800/50 border-b border-slate-200/80 dark:border-zinc-800">
 							<div className="flex items-center gap-3">
-								<div className="w-10 h-10 rounded-xl bg-[#035786] flex items-center justify-center p-2 shadow-sm shadow-[#035786]/20 shrink-0">
+								<div className="w-10 h-10 rounded-md bg-[#035786] flex items-center justify-center p-2 shadow-xs shrink-0">
 									<Image
 										src="/brand/logo-icono-white.svg"
 										alt="AdaptaPro Ícono"
