@@ -37,10 +37,7 @@ import {
 } from 'lucide-react';
 import type { RequisicionConRelaciones } from '@/types/requisicion';
 import { formatMontoBs, parseMontoBs } from '@/utils/currency';
-import {
-	ESTADOS_FILTRO_COMPRAS,
-	getEstadoLabel,
-} from '@/constants/requisicion';
+import { ESTADOS_FILTRO_COMPRAS } from '@/constants/requisicion';
 import { usePagination } from '@/hooks/usePagination';
 import { Pagination } from '@/components/ui/pagination';
 

@@ -97,10 +97,10 @@ export function DepartamentoModal({
 			open={isOpen}
 			onOpenChange={(open) => !open && !isPending && handleClose()}
 		>
-			<DialogContent className="sm:max-w-md w-[95vw] bg-white dark:bg-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800">
+			<DialogContent className="sm:max-w-md w-[95vw] bg-white dark:bg-zinc-900 rounded-lg p-0 overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800">
 				<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-800/50 border-b border-slate-200 dark:border-zinc-800">
 					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 rounded-xl bg-[#301996]/10 text-[#301996] dark:bg-purple-950 dark:text-purple-300 flex items-center justify-center shrink-0">
+						<div className="w-10 h-10 rounded-md bg-[#035786]/10 text-[#035786] dark:bg-[#035786]/20 dark:text-sky-400 flex items-center justify-center shrink-0 border border-[#035786]/20">
 							{isEditing ? (
 								<Pencil className="w-5 h-5" />
 							) : (
@@ -127,7 +127,7 @@ export function DepartamentoModal({
 					className="p-5 sm:p-6 space-y-4"
 				>
 					{serverError && (
-						<div className="flex items-start gap-2.5 p-3 rounded-xl text-xs sm:text-sm text-red-700 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900 animate-in fade-in-50">
+						<div className="flex items-start gap-2.5 p-3 rounded-md text-xs sm:text-sm text-red-700 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900 animate-in fade-in-50">
 							<AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
 							<span>{serverError}</span>
 						</div>
@@ -141,7 +141,7 @@ export function DepartamentoModal({
 						<Input
 							placeholder="Ej: Tecnología e Informática"
 							{...form.register('nombre')}
-							className="h-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700"
+							className="h-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700 focus-visible:border-[#035786] focus-visible:ring-[#035786]/20"
 							disabled={isPending}
 						/>
 						{form.formState.errors.nombre && (
@@ -152,7 +152,7 @@ export function DepartamentoModal({
 					</div>
 
 					{/* Estado Activo / Inactivo */}
-					<div className="pt-2 flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/80 dark:border-zinc-800">
+					<div className="pt-2 flex items-center justify-between p-3 rounded-md bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/80 dark:border-zinc-800">
 						<div>
 							<span className="text-xs font-semibold text-slate-800 dark:text-slate-200 block">
 								Estado del Departamento
@@ -188,14 +188,14 @@ export function DepartamentoModal({
 							variant="outline"
 							onClick={handleClose}
 							disabled={isPending}
-							className="h-10 px-4 rounded-xl text-xs sm:text-sm"
+							className="h-10 px-4 rounded-md text-xs sm:text-sm"
 						>
 							Cancelar
 						</Button>
 						<Button
 							type="submit"
 							disabled={isPending}
-							className="h-10 px-5 rounded-xl bg-[#301996] hover:bg-[#25137a] text-white font-medium text-xs sm:text-sm gap-2 shadow-sm"
+							className="h-10 px-5 rounded-md text-xs sm:text-sm gap-2 shadow-xs"
 						>
 							{isPending ? (
 								<>

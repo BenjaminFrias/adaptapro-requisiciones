@@ -47,11 +47,11 @@ export function ConfirmarEstadoUsuarioModal({
 			open={isOpen}
 			onOpenChange={(open) => !open && !isPending && onClose()}
 		>
-			<DialogContent className="sm:max-w-md w-[95vw] bg-white dark:bg-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800">
+			<DialogContent className="sm:max-w-md w-[95vw] bg-white dark:bg-zinc-900 rounded-lg p-0 overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800">
 				<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-800/50 border-b border-slate-200 dark:border-zinc-800">
 					<div className="flex items-center gap-3">
 						<div
-							className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+							className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 ${
 								isInactivando
 									? 'bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400'
 									: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400'
@@ -78,13 +78,13 @@ export function ConfirmarEstadoUsuarioModal({
 
 				<div className="p-5 sm:p-6 space-y-4">
 					{serverError && (
-						<div className="flex items-start gap-2.5 p-3 rounded-xl text-xs sm:text-sm text-red-700 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900">
+						<div className="flex items-start gap-2.5 p-3 rounded-md text-xs sm:text-sm text-red-700 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900">
 							<AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
 							<span>{serverError}</span>
 						</div>
 					)}
 
-					<div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/80 dark:border-zinc-800 text-xs space-y-1.5">
+					<div className="p-3.5 rounded-md bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/80 dark:border-zinc-800 text-xs space-y-1.5">
 						<div className="flex justify-between">
 							<span className="text-slate-500">Usuario:</span>
 							<span className="font-semibold text-slate-900 dark:text-white">
@@ -128,7 +128,7 @@ export function ConfirmarEstadoUsuarioModal({
 							variant="outline"
 							onClick={onClose}
 							disabled={isPending}
-							className="h-10 px-4 rounded-xl text-xs sm:text-sm"
+							className="h-10 px-4 rounded-md text-xs sm:text-sm"
 						>
 							Cancelar
 						</Button>
@@ -136,7 +136,7 @@ export function ConfirmarEstadoUsuarioModal({
 							type="button"
 							onClick={handleConfirmar}
 							disabled={isPending}
-							className={`h-10 px-4 rounded-xl text-white font-medium text-xs sm:text-sm gap-2 shadow-sm ${
+							className={`h-10 px-4 rounded-md text-white font-medium text-xs sm:text-sm gap-2 shadow-xs ${
 								isInactivando
 									? 'bg-rose-600 hover:bg-rose-700'
 									: 'bg-emerald-600 hover:bg-emerald-700'

@@ -22,18 +22,18 @@ import {
 import {
 	usuarioFormSchema,
 	type UsuarioFormData,
-	type EditarUsuarioInput,
 	type CrearUsuarioInput,
+	type EditarUsuarioInput,
 } from '@/schemas/usuario.schema';
 import { crearUsuarioAction, editarUsuarioAction } from '@/actions/admin';
 import type { UsuarioAdmin, DepartamentoSimple } from '@/types/admin';
 import {
 	Loader2,
 	AlertCircle,
-	Eye,
-	EyeOff,
 	UserPlus,
 	Pencil,
+	Eye,
+	EyeOff,
 } from 'lucide-react';
 
 interface UsuarioModalProps {
@@ -41,7 +41,6 @@ interface UsuarioModalProps {
 	onClose: () => void;
 	usuarioAEditar: UsuarioAdmin | null;
 	departamentos: DepartamentoSimple[];
-	currentUserId?: number;
 }
 
 export function UsuarioModal({
@@ -49,14 +48,13 @@ export function UsuarioModal({
 	onClose,
 	usuarioAEditar,
 	departamentos,
-	currentUserId,
 }: UsuarioModalProps) {
 	const [isPending, startTransition] = useTransition();
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [showPassword, setShowPassword] = useState(false);
 
 	const isEditing = !!usuarioAEditar;
-	const isSelf = isEditing && currentUserId === usuarioAEditar.id;
+	const isSelf = usuarioAEditar?.rol === 'ADMINISTRADOR';
 
 	const form = useForm<UsuarioFormData>({
 		resolver: zodResolver(usuarioFormSchema),
@@ -65,9 +63,9 @@ export function UsuarioModal({
 			nombre: usuarioAEditar?.nombre || '',
 			usuario: usuarioAEditar?.usuario || '',
 			correo: usuarioAEditar?.correo || '',
-			password: '',
 			rol: usuarioAEditar?.rol || 'SOLICITANTE',
-			departamentoId: usuarioAEditar?.departamentoId || departamentos[0]?.id || 1,
+			departamentoId: usuarioAEditar?.departamentoId || undefined,
+			password: '',
 			activo: usuarioAEditar ? usuarioAEditar.activo : true,
 		},
 	});
@@ -76,7 +74,6 @@ export function UsuarioModal({
 		if (isPending) return;
 		setServerError(null);
 		setShowPassword(false);
-		form.reset();
 		onClose();
 	};
 
@@ -89,9 +86,9 @@ export function UsuarioModal({
 					nombre: values.nombre,
 					usuario: values.usuario,
 					correo: values.correo,
-					password: values.password || undefined,
 					rol: values.rol,
 					departamentoId: values.departamentoId,
+					password: values.password || undefined,
 					activo: values.activo,
 				} as EditarUsuarioInput);
 
@@ -103,13 +100,20 @@ export function UsuarioModal({
 					onClose();
 				}
 			} else {
+				if (!values.password) {
+					form.setError('password', {
+						message: 'La contraseña es requerida para nuevos usuarios',
+					});
+					return;
+				}
+
 				const res = await crearUsuarioAction({
 					nombre: values.nombre,
 					usuario: values.usuario,
 					correo: values.correo,
-					password: values.password || '',
 					rol: values.rol,
 					departamentoId: values.departamentoId,
+					password: values.password,
 					activo: values.activo,
 				} as CrearUsuarioInput);
 
@@ -136,10 +140,10 @@ export function UsuarioModal({
 			open={isOpen}
 			onOpenChange={(open) => !open && !isPending && handleClose()}
 		>
-			<DialogContent className="sm:max-w-lg w-[95vw] bg-white dark:bg-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800">
+			<DialogContent className="sm:max-w-lg w-[95vw] bg-white dark:bg-zinc-900 rounded-lg p-0 overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800">
 				<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-800/50 border-b border-slate-200 dark:border-zinc-800">
 					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 rounded-xl bg-[#301996]/10 text-[#301996] dark:bg-purple-950 dark:text-purple-300 flex items-center justify-center shrink-0">
+						<div className="w-10 h-10 rounded-md bg-[#035786]/10 text-[#035786] dark:bg-[#035786]/20 dark:text-sky-400 flex items-center justify-center shrink-0 border border-[#035786]/20">
 							{isEditing ? (
 								<Pencil className="w-5 h-5" />
 							) : (
@@ -165,7 +169,7 @@ export function UsuarioModal({
 				>
 					{/* Alerta de error del servidor */}
 					{serverError && (
-						<div className="flex items-start gap-2.5 p-3 rounded-xl text-xs sm:text-sm text-red-700 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900 animate-in fade-in-50">
+						<div className="flex items-start gap-2.5 p-3 rounded-md text-xs sm:text-sm text-red-700 bg-red-50 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900 animate-in fade-in-50">
 							<AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
 							<span>{serverError}</span>
 						</div>
@@ -179,7 +183,7 @@ export function UsuarioModal({
 						<Input
 							placeholder="Ej: Pedro Pérez"
 							{...form.register('nombre')}
-							className="h-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700"
+							className="h-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700 focus-visible:border-[#035786] focus-visible:ring-[#035786]/20"
 							disabled={isPending}
 						/>
 						{form.formState.errors.nombre && (
@@ -199,7 +203,7 @@ export function UsuarioModal({
 							<Input
 								placeholder="Ej: pperez"
 								{...form.register('usuario')}
-								className="h-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700"
+								className="h-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700 focus-visible:border-[#035786] focus-visible:ring-[#035786]/20"
 								disabled={isPending}
 							/>
 							{form.formState.errors.usuario && (
@@ -218,7 +222,7 @@ export function UsuarioModal({
 								type="email"
 								placeholder="usuario@adaptapro.com"
 								{...form.register('correo')}
-								className="h-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700"
+								className="h-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700 focus-visible:border-[#035786] focus-visible:ring-[#035786]/20"
 								disabled={isPending}
 							/>
 							{form.formState.errors.correo && (
@@ -252,12 +256,12 @@ export function UsuarioModal({
 									}
 								}}
 							>
-								<SelectTrigger className="h-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700">
+								<SelectTrigger className="h-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700 focus:ring-[#035786]/20">
 									<SelectValue placeholder="Seleccionar rol">
 										{rolActual}
 									</SelectValue>
 								</SelectTrigger>
-								<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
+								<SelectContent className="rounded-md border-slate-200 dark:border-zinc-800">
 									<SelectItem value="SOLICITANTE">Solicitante</SelectItem>
 									<SelectItem value="APROBADOR">Aprobador</SelectItem>
 									<SelectItem value="COMPRAS">Compras</SelectItem>
@@ -285,13 +289,13 @@ export function UsuarioModal({
 									}
 								}}
 							>
-								<SelectTrigger className="h-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700">
+								<SelectTrigger className="h-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700 focus:ring-[#035786]/20">
 									<SelectValue placeholder="Seleccionar departamento">
 										{departamentos.find((d) => d.id === Number(deptoActual))
 											?.nombre || 'Seleccione'}
 									</SelectValue>
 								</SelectTrigger>
-								<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800 max-h-56">
+								<SelectContent className="rounded-md border-slate-200 dark:border-zinc-800 max-h-56">
 									{departamentos.map((depto) => (
 										<SelectItem key={depto.id} value={String(depto.id)}>
 											{depto.nombre}
@@ -328,13 +332,13 @@ export function UsuarioModal({
 									isEditing ? '•••••••• (Sin cambios)' : 'Mínimo 8 caracteres'
 								}
 								{...form.register('password')}
-								className="h-10 pr-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700"
+								className="h-10 pr-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700 focus-visible:border-[#035786] focus-visible:ring-[#035786]/20"
 								disabled={isPending}
 							/>
 							<button
 								type="button"
 								onClick={() => setShowPassword(!showPassword)}
-								className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+								className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
 								tabIndex={-1}
 							>
 								{showPassword ? (
@@ -352,15 +356,15 @@ export function UsuarioModal({
 					</div>
 
 					{/* Estado Activo / Inactivo */}
-					<div className="pt-2 flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/80 dark:border-zinc-800">
+					<div className="pt-2 flex items-center justify-between p-3 rounded-md bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/80 dark:border-zinc-800">
 						<div>
 							<span className="text-xs font-semibold text-slate-800 dark:text-slate-200 block">
-								Estado de la Cuenta
+								Estado del Usuario
 							</span>
 							<p className="text-[11px] text-slate-500 dark:text-slate-400">
 								{activoActual
-									? 'El usuario puede iniciar sesión y operar con normalidad.'
-									: 'Acceso bloqueado al sistema (soft delete).'}
+									? 'Usuario habilitado para iniciar sesión en el sistema.'
+									: 'Usuario suspendido. No podrá iniciar sesión.'}
 							</p>
 						</div>
 						<button
@@ -393,14 +397,14 @@ export function UsuarioModal({
 							variant="outline"
 							onClick={handleClose}
 							disabled={isPending}
-							className="h-10 px-4 rounded-xl text-xs sm:text-sm"
+							className="h-10 px-4 rounded-md text-xs sm:text-sm"
 						>
 							Cancelar
 						</Button>
 						<Button
 							type="submit"
 							disabled={isPending}
-							className="h-10 px-5 rounded-xl bg-[#301996] hover:bg-[#25137a] text-white font-medium text-xs sm:text-sm gap-2 shadow-sm"
+							className="h-10 px-5 rounded-md text-xs sm:text-sm gap-2 shadow-xs"
 						>
 							{isPending ? (
 								<>

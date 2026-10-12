@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
 	Table,
 	TableBody,
@@ -21,16 +21,16 @@ import {
 import {
 	Search,
 	X,
-	Building2,
 	Pencil,
 	Power,
-	Users,
-	FileText,
 	CheckCircle2,
 	XCircle,
 	Plus,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { DepartamentoAdmin } from '@/types/admin';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
 import { DepartamentoModal } from './DepartamentoModal';
 import { ConfirmarEstadoDepartamentoModal } from './ConfirmarEstadoDepartamentoModal';
 
@@ -51,16 +51,37 @@ export function DepartamentosAdminTable({
 	const [departamentoAToggle, setDepartamentoAToggle] =
 		useState<DepartamentoAdmin | null>(null);
 
-	// Filtros
-	const listaFiltrada = departamentos.filter((d) => {
-		const matchTexto = d.nombre.toLowerCase().includes(busqueda.toLowerCase());
+	// Filtros reactivos con useMemo
+	const listaFiltrada = useMemo(() => {
+		const query = busqueda.toLowerCase().trim();
+		return departamentos.filter((d) => {
+			const matchTexto = !query || d.nombre.toLowerCase().includes(query);
 
-		const matchEstado =
-			filtroEstado === 'TODOS' ||
-			(filtroEstado === 'ACTIVOS' && d.activo) ||
-			(filtroEstado === 'INACTIVOS' && !d.activo);
+			const matchEstado =
+				filtroEstado === 'TODOS' ||
+				(filtroEstado === 'ACTIVOS' && d.activo) ||
+				(filtroEstado === 'INACTIVOS' && !d.activo);
 
-		return matchTexto && matchEstado;
+			return matchTexto && matchEstado;
+		});
+	}, [departamentos, busqueda, filtroEstado]);
+
+	// Paginación reactiva
+	const {
+		currentPage,
+		pageSize,
+		totalPages,
+		totalItems,
+		paginatedItems,
+		startItem,
+		endItem,
+		canNext,
+		canPrev,
+		goToPage,
+		setPageSize,
+	} = usePagination({
+		items: listaFiltrada,
+		initialPageSize: 15,
 	});
 
 	const handleCrear = () => {
@@ -74,85 +95,88 @@ export function DepartamentosAdminTable({
 	};
 
 	return (
-		<div className="space-y-4">
-			{/* Barra Superior: Búsqueda, Filtro Estado y Botón Crear */}
-			<div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-xs flex flex-col lg:flex-row gap-3.5 items-stretch lg:items-center justify-between">
-				<div className="relative flex-1 max-w-md">
-					<Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-					<Input
-						placeholder="Buscar departamento por nombre..."
-						value={busqueda}
-						onChange={(e) => setBusqueda(e.target.value)}
-						className="pl-9.5 pr-8 h-10 text-xs sm:text-sm bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl focus-visible:ring-[#301996]/20 focus-visible:border-[#301996]"
-					/>
-					{busqueda && (
-						<button
-							type="button"
-							onClick={() => setBusqueda('')}
-							className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-							aria-label="Limpiar búsqueda"
-						>
-							<X className="w-3.5 h-3.5" />
-						</button>
-					)}
-				</div>
-
-				<div className="flex flex-wrap items-center gap-2.5">
+		<>
+			<div className="rounded-md border border-slate-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+				{/* Cabecera integrada: Filtros a la izquierda + Buscador y Botón Crear a la derecha */}
+				<div className="p-2 sm:px-3 sm:py-2.5 border-b border-slate-200/80 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-2.5 bg-white dark:bg-zinc-900">
 					{/* Filtro por Estado */}
-					<div className="flex items-center gap-1.5">
-						<span className="text-xs font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
-							Estado:
-						</span>
-						<Select
-							value={filtroEstado}
-							onValueChange={(val) => setFiltroEstado(val || 'TODOS')}
-						>
-							<SelectTrigger className="h-10 min-w-36 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-zinc-800/70 border-slate-200 dark:border-zinc-700/80 rounded-xl px-3">
-								<SelectValue placeholder="Todos">
-									{filtroEstado === 'TODOS'
-										? 'Todos'
-										: filtroEstado === 'ACTIVOS'
-											? 'Solo Activos'
-											: 'Solo Inactivos'}
-								</SelectValue>
-							</SelectTrigger>
-							<SelectContent className="rounded-xl border-slate-200 dark:border-zinc-800">
-								<SelectItem value="TODOS">Todos</SelectItem>
-								<SelectItem value="ACTIVOS">Solo Activos</SelectItem>
-								<SelectItem value="INACTIVOS">Solo Inactivos</SelectItem>
-							</SelectContent>
-						</Select>
+					<div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+						<div className="w-full sm:w-44 shrink-0">
+							<Select
+								value={filtroEstado}
+								onValueChange={(val) => setFiltroEstado(val || 'TODOS')}
+							>
+								<SelectTrigger
+									size="sm"
+									className="h-8.5 w-full text-xs bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700/80 rounded-md focus:ring-[#035786]/20 px-2.5"
+								>
+									<SelectValue placeholder="Todos los estados">
+										{filtroEstado === 'TODOS'
+											? 'Todos los estados'
+											: filtroEstado === 'ACTIVOS'
+												? 'Solo activos'
+												: 'Solo inactivos'}
+									</SelectValue>
+								</SelectTrigger>
+								<SelectContent className="rounded-md border-slate-200 dark:border-zinc-800">
+									<SelectItem value="TODOS">Todos los estados</SelectItem>
+									<SelectItem value="ACTIVOS">Solo activos</SelectItem>
+									<SelectItem value="INACTIVOS">Solo inactivos</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
 					</div>
 
-					{/* Botón Crear Departamento */}
-					<Button
-						onClick={handleCrear}
-						className="h-10 px-4 rounded-xl bg-[#301996] hover:bg-[#25137a] text-white font-medium text-xs sm:text-sm gap-2 shadow-sm shrink-0"
-					>
-						<Plus className="w-4 h-4" />
-						Nuevo Departamento
-					</Button>
-				</div>
-			</div>
+					{/* Búsqueda compacta y Botón Crear */}
+					<div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+						<div className="relative w-full sm:w-60 shrink-0">
+							<Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+							<Input
+								placeholder="Buscar departamento..."
+								value={busqueda}
+								onChange={(e) => setBusqueda(e.target.value)}
+								className="h-8.5 pl-8 pr-7 text-xs bg-slate-50 dark:bg-zinc-800/80 border-slate-200 dark:border-zinc-700/80 rounded-md focus-visible:bg-white focus-visible:border-[#035786]"
+							/>
+							{busqueda && (
+								<button
+									type="button"
+									onClick={() => setBusqueda('')}
+									className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+									aria-label="Limpiar búsqueda"
+								>
+									<X className="w-3 h-3" />
+								</button>
+							)}
+						</div>
 
-			{/* Tabla de Departamentos */}
-			<div className="rounded-2xl border border-slate-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 overflow-hidden shadow-xs">
+						<Button
+							size="sm"
+							onClick={handleCrear}
+							className="h-8.5 px-3 rounded-md text-xs font-semibold gap-1.5 shrink-0 shadow-xs"
+						>
+							<Plus className="w-3.5 h-3.5" />
+							<span>Nuevo Departamento</span>
+						</Button>
+					</div>
+				</div>
+
+				{/* Tabla de Departamentos */}
 				<Table>
-					<TableHeader className="bg-slate-50/80 dark:bg-zinc-800/60 border-b border-slate-200/80 dark:border-zinc-800">
+					<TableHeader className="bg-slate-50/75 dark:bg-zinc-800/60 border-b border-slate-200/80 dark:border-zinc-800">
 						<TableRow className="hover:bg-transparent">
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5 pl-5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3 pl-5">
 								Departamento
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3">
 								Usuarios Asignados
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3">
 								Requisiciones Asociadas
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3">
 								Estado
 							</TableHead>
-							<TableHead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider py-3.5 text-right pr-5">
+							<TableHead className="text-xs font-medium text-slate-500 dark:text-zinc-400 py-3 text-right pr-5">
 								Acciones
 							</TableHead>
 						</TableRow>
@@ -164,60 +188,54 @@ export function DepartamentosAdminTable({
 									colSpan={5}
 									className="h-36 text-center text-xs text-slate-500"
 								>
-									No se encontraron departamentos coincidentes con los criterios
-									de búsqueda.
+									No se encontraron departamentos coincidentes con los filtros
+									aplicados.
 								</TableCell>
 							</TableRow>
 						) : (
-							listaFiltrada.map((depto) => (
+							paginatedItems.map((depto) => (
 								<TableRow
 									key={depto.id}
-									className={`hover:bg-slate-50/60 border-b border-slate-100 dark:border-zinc-800/60 ${
-										!depto.activo ? 'opacity-70 bg-slate-50/30' : ''
-									}`}
+									className={cn(
+										'hover:bg-slate-50/80 dark:hover:bg-zinc-800/50 transition-colors border-b border-slate-100 dark:border-zinc-800/70 group',
+										!depto.activo && 'opacity-65 bg-slate-50/40 dark:bg-zinc-900/40',
+									)}
 								>
-									{/* Nombre */}
-									<TableCell className="py-3.5 pl-5">
-										<div className="flex items-center gap-3">
-											<div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:bg-amber-950/60 dark:text-amber-300 font-bold text-xs flex items-center justify-center shrink-0 border border-amber-500/20">
-												<Building2 className="w-4 h-4" />
-											</div>
-											<div>
-												<div className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-white">
-													{depto.nombre}
-												</div>
-												<div className="text-[11px] text-slate-400">
-													ID: #{depto.id}
-												</div>
-											</div>
+									{/* Nombre e ID */}
+									<TableCell className="py-3 pl-5">
+										<div className="flex items-center gap-2.5">
+											<span className="font-mono font-medium text-xs text-[#035786] dark:text-sky-400 bg-[#035786]/10 dark:bg-[#035786]/20 px-2 py-0.5 rounded-md border border-[#035786]/20">
+												#{depto.id}
+											</span>
+											<span className="font-medium text-xs text-slate-800 dark:text-slate-200">
+												{depto.nombre}
+											</span>
 										</div>
 									</TableCell>
 
 									{/* Cantidad Usuarios */}
-									<TableCell className="py-3.5">
-										<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-300">
-											<Users className="w-3.5 h-3.5 text-slate-500" />
+									<TableCell className="py-3 text-xs">
+										<span className="font-medium text-slate-700 dark:text-slate-300">
 											{depto._count?.usuarios || 0} usuarios
 										</span>
 									</TableCell>
 
 									{/* Cantidad Requisiciones */}
-									<TableCell className="py-3.5">
-										<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-300">
-											<FileText className="w-3.5 h-3.5 text-slate-500" />
+									<TableCell className="py-3 text-xs">
+										<span className="font-medium text-slate-700 dark:text-slate-300">
 											{depto._count?.requisiciones || 0} requisiciones
 										</span>
 									</TableCell>
 
 									{/* Estado */}
-									<TableCell className="py-3.5">
+									<TableCell className="py-3">
 										{depto.activo ? (
-											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+											<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
 												<CheckCircle2 className="w-3 h-3" />
 												Activo
 											</span>
 										) : (
-											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+											<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/60">
 												<XCircle className="w-3 h-3" />
 												Inactivo
 											</span>
@@ -225,12 +243,12 @@ export function DepartamentosAdminTable({
 									</TableCell>
 
 									{/* Acciones */}
-									<TableCell className="py-3.5 text-right pr-5">
+									<TableCell className="py-3 text-right pr-5">
 										<div className="flex items-center justify-end gap-1.5">
 											<Button
 												variant="ghost"
 												size="sm"
-												className="h-8 w-8 p-0 rounded-lg text-slate-500 hover:text-[#301996] hover:bg-slate-100 dark:hover:bg-zinc-800"
+												className="h-8 w-8 p-0 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
 												onClick={() => handleEditar(depto)}
 												title="Editar Departamento"
 											>
@@ -240,11 +258,12 @@ export function DepartamentosAdminTable({
 											<Button
 												variant="ghost"
 												size="sm"
-												className={`h-8 w-8 p-0 rounded-lg ${
+												className={cn(
+													'h-8 w-8 p-0 rounded-md',
 													depto.activo
 														? 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40'
-														: 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
-												}`}
+														: 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40',
+												)}
 												onClick={() => setDepartamentoAToggle(depto)}
 												title={
 													depto.activo
@@ -261,6 +280,20 @@ export function DepartamentosAdminTable({
 						)}
 					</TableBody>
 				</Table>
+
+				{/* Paginador */}
+				<Pagination
+					currentPage={currentPage}
+					totalPages={totalPages}
+					totalItems={totalItems}
+					pageSize={pageSize}
+					startItem={startItem}
+					endItem={endItem}
+					canNext={canNext}
+					canPrev={canPrev}
+					onPageChange={goToPage}
+					onPageSizeChange={setPageSize}
+				/>
 			</div>
 
 			{/* Modal Crear / Editar Departamento */}
@@ -280,6 +313,6 @@ export function DepartamentosAdminTable({
 				departamento={departamentoAToggle}
 				onClose={() => setDepartamentoAToggle(null)}
 			/>
-		</div>
+		</>
 	);
 }
