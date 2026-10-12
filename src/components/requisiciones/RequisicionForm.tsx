@@ -164,7 +164,7 @@ export function RequisicionForm({
 					<span className="w-5 h-5 rounded-md bg-[#035786]/10 text-[#035786] dark:bg-[#035786]/20 dark:text-sky-400 flex items-center justify-center font-bold text-xs">
 						1
 					</span>
-					<h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+					<h3 className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">
 						Información General
 					</h3>
 				</div>
@@ -297,7 +297,7 @@ export function RequisicionForm({
 						<span className="w-5 h-5 rounded-md bg-[#035786]/10 text-[#035786] dark:bg-[#035786]/20 dark:text-sky-400 flex items-center justify-center font-bold text-xs">
 							2
 						</span>
-						<h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+						<h3 className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
 							<PackagePlus className="w-4 h-4 text-[#035786] dark:text-sky-400" />
 							{watchedTipo === 'SERVICIO'
 								? 'Servicios Solicitados'
@@ -333,7 +333,7 @@ export function RequisicionForm({
 				)}
 
 				{/* Encabezados de tabla de ítems para pantallas medianas */}
-				<div className="hidden sm:grid grid-cols-12 gap-2 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+				<div className="hidden sm:grid grid-cols-12 gap-2 px-3 text-[11px] font-medium text-slate-500">
 					<div className="col-span-5">
 						{watchedTipo === 'SERVICIO'
 							? 'Descripción del Servicio *'
@@ -446,8 +446,8 @@ export function RequisicionForm({
 					</div>
 
 					<div className="flex items-center gap-2">
-						<span className="text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-							Total Estimado:
+						<span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+							Total estimado:
 						</span>
 						<span className="text-sm sm:text-base font-semibold font-mono text-[#035786] dark:text-sky-400 tabular-nums">
 							{formatMontoBs(totalEstimado, true)}
