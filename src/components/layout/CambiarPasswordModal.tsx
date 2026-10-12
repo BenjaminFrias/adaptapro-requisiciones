@@ -89,11 +89,11 @@ export function CambiarPasswordModal({
 			open={isOpen}
 			onOpenChange={(open) => !open && !isPending && handleClose()}
 		>
-			<DialogContent className="sm:max-w-md w-[95vw] bg-white dark:bg-zinc-900 rounded-2xl p-0 overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800">
+			<DialogContent className="sm:max-w-md w-[95vw] bg-white dark:bg-zinc-900 rounded-lg p-0 overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800">
 				{/* Cabecera del Modal */}
 				<DialogHeader className="p-5 sm:p-6 bg-slate-50/70 dark:bg-zinc-800/50 border-b border-slate-200 dark:border-zinc-800">
 					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 rounded-xl bg-linear-to-tr from-[#301996] to-[#035786] flex items-center justify-center text-white shadow-sm shrink-0">
+						<div className="w-10 h-10 rounded-md bg-[#035786] flex items-center justify-center text-white shrink-0">
 							<KeyRound className="w-5 h-5" />
 						</div>
 						<div>
@@ -127,7 +127,7 @@ export function CambiarPasswordModal({
 							<Button
 								type="button"
 								onClick={handleClose}
-								className="w-full bg-[#301996] hover:bg-[#301996]/90 text-white rounded-xl text-xs sm:text-sm font-semibold h-10 cursor-pointer"
+								className="w-full bg-[#035786] hover:bg-[#02456b] text-white rounded-md text-xs sm:text-sm font-semibold h-10 cursor-pointer"
 							>
 								Entendido
 							</Button>
@@ -140,7 +140,7 @@ export function CambiarPasswordModal({
 						className="p-5 sm:p-6 space-y-4"
 					>
 						{serverError && (
-							<div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/80 flex items-start gap-2.5 text-red-700 dark:text-red-300 text-xs">
+							<div className="p-3 rounded-md bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/80 flex items-start gap-2.5 text-red-700 dark:text-red-300 text-xs">
 								<AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
 								<span>{serverError}</span>
 							</div>
@@ -160,14 +160,16 @@ export function CambiarPasswordModal({
 									type={showCurrentPassword ? 'text' : 'password'}
 									placeholder="Ingresa tu contraseña actual"
 									{...form.register('currentPassword')}
-									className="h-10 pr-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700"
+									className="h-10 pr-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700"
 									disabled={isPending}
 									autoComplete="current-password"
 								/>
-								<button
+								<Button
 									type="button"
+									variant="ghost"
+									size="icon-xs"
 									onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-									className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+									className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md"
 									tabIndex={-1}
 									aria-label={
 										showCurrentPassword
@@ -180,7 +182,7 @@ export function CambiarPasswordModal({
 									) : (
 										<Eye className="w-4 h-4" />
 									)}
-								</button>
+								</Button>
 							</div>
 							{form.formState.errors.currentPassword && (
 								<p className="text-[11px] text-red-600 dark:text-red-400 font-medium">
@@ -208,14 +210,16 @@ export function CambiarPasswordModal({
 									type={showNewPassword ? 'text' : 'password'}
 									placeholder="Ingresa tu nueva clave de acceso"
 									{...form.register('newPassword')}
-									className="h-10 pr-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700"
+									className="h-10 pr-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700"
 									disabled={isPending}
 									autoComplete="new-password"
 								/>
-								<button
+								<Button
 									type="button"
+									variant="ghost"
+									size="icon-xs"
 									onClick={() => setShowNewPassword(!showNewPassword)}
-									className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+									className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md"
 									tabIndex={-1}
 									aria-label={
 										showNewPassword
@@ -228,7 +232,7 @@ export function CambiarPasswordModal({
 									) : (
 										<Eye className="w-4 h-4" />
 									)}
-								</button>
+								</Button>
 							</div>
 							{form.formState.errors.newPassword && (
 								<p className="text-[11px] text-red-600 dark:text-red-400 font-medium">
@@ -251,14 +255,16 @@ export function CambiarPasswordModal({
 									type={showConfirmPassword ? 'text' : 'password'}
 									placeholder="Repite la nueva contraseña"
 									{...form.register('confirmPassword')}
-									className="h-10 pr-10 text-xs sm:text-sm rounded-xl border-slate-200 dark:border-zinc-700"
+									className="h-10 pr-10 text-xs sm:text-sm rounded-md border-slate-200 dark:border-zinc-700"
 									disabled={isPending}
 									autoComplete="new-password"
 								/>
-								<button
+								<Button
 									type="button"
+									variant="ghost"
+									size="icon-xs"
 									onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-									className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+									className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md"
 									tabIndex={-1}
 									aria-label={
 										showConfirmPassword
@@ -271,7 +277,7 @@ export function CambiarPasswordModal({
 									) : (
 										<Eye className="w-4 h-4" />
 									)}
-								</button>
+								</Button>
 							</div>
 							{form.formState.errors.confirmPassword && (
 								<p className="text-[11px] text-red-600 dark:text-red-400 font-medium">
@@ -287,14 +293,14 @@ export function CambiarPasswordModal({
 								variant="ghost"
 								onClick={handleClose}
 								disabled={isPending}
-								className="text-xs rounded-xl h-9 text-slate-600 dark:text-slate-400 cursor-pointer"
+								className="text-xs rounded-md h-9 text-slate-600 dark:text-slate-400 cursor-pointer"
 							>
 								Cancelar
 							</Button>
 							<Button
 								type="submit"
 								disabled={isPending}
-								className="bg-[#301996] hover:bg-[#301996]/90 text-white rounded-xl text-xs font-semibold h-9 px-4 shadow-sm cursor-pointer"
+								className="bg-[#035786] hover:bg-[#02456b] text-white rounded-md text-xs font-semibold h-9 px-4 cursor-pointer"
 							>
 								{isPending ? (
 									<>

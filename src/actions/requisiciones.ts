@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { requisicionSchema, RequisicionInput } from "@/schemas/requisicion.schema";
 import { revalidatePath } from "next/cache";
-import type { EstadoRequisicion } from "@prisma/client";
+import type { EstadoRequisicion, Prisma } from "@prisma/client";
 import {
   crearNotificaciones,
   getAprobadoresDepartamento,
@@ -438,3 +438,117 @@ export async function cancelarRequisicion(requisicionId: number, motivo: string 
     return { success: false, error: "Error al cancelar la requisición" };
   }
 }
+
+/**
+ * Búsqueda rápida de requisiciones para el Command Palette / Barra de búsqueda de la cabecera.
+ * Respeta permisos según rol (RBAC):
+ * - ADMINISTRADOR: Busca en todas las requisiciones.
+ * - APROBADOR: Busca en sus requisiciones y las de su departamento.
+ * - COMPRAS: Busca en sus requisiciones y en las que estén en APROBADA, EN_COMPRA, ATENDIDA.
+ * - SOLICITANTE: Busca en sus requisiciones.
+ */
+export async function buscarRequisicionesRapidas(query: string = "") {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: "No autenticado", requisiciones: [] };
+  }
+
+  const userId = parseInt(session.user.id, 10);
+  const userRole = session.user.rol;
+  const userDeptoId = session.user.departamentoId;
+
+  // Filtro de permisos por RBAC
+  let permissionWhere: Prisma.RequisicionWhereInput = {};
+
+  if (userRole === "ADMINISTRADOR") {
+    permissionWhere = {};
+  } else if (userRole === "APROBADOR") {
+    permissionWhere = {
+      OR: [
+        { solicitanteId: userId },
+        { departamentoId: userDeptoId },
+      ],
+    };
+  } else if (userRole === "COMPRAS") {
+    permissionWhere = {
+      OR: [
+        { solicitanteId: userId },
+        { estado: { in: ["APROBADA", "EN_COMPRA", "ATENDIDA"] } },
+      ],
+    };
+  } else {
+    // SOLICITANTE
+    permissionWhere = {
+      solicitanteId: userId,
+    };
+  }
+
+  const cleanQuery = query.trim();
+
+  const searchWhere: Prisma.RequisicionWhereInput = cleanQuery
+    ? {
+        OR: [
+          { numero: { contains: cleanQuery, mode: "insensitive" } },
+          { justificacion: { contains: cleanQuery, mode: "insensitive" } },
+          {
+            items: {
+              some: {
+                descripcion: { contains: cleanQuery, mode: "insensitive" },
+              },
+            },
+          },
+          {
+            departamento: {
+              nombre: { contains: cleanQuery, mode: "insensitive" },
+            },
+          },
+          {
+            comprasDatos: {
+              is: {
+                proveedor: { contains: cleanQuery, mode: "insensitive" },
+              },
+            },
+          },
+        ],
+      }
+    : {};
+
+  try {
+    const requisiciones = await db.requisicion.findMany({
+      where: {
+        AND: [permissionWhere, searchWhere],
+      },
+      include: {
+        items: true,
+        departamento: true,
+        solicitante: {
+          select: { id: true, nombre: true, usuario: true },
+        },
+        historial: {
+          include: {
+            usuario: {
+              select: { nombre: true, usuario: true, rol: true },
+            },
+          },
+          orderBy: {
+            fecha: "asc",
+          },
+        },
+        comprasDatos: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 8,
+    });
+
+    return {
+      success: true,
+      requisiciones: JSON.parse(JSON.stringify(requisiciones)),
+    };
+  } catch (error) {
+    console.error("Error al buscar requisiciones rápidas:", error);
+    return { success: false, error: "Error al buscar requisiciones", requisiciones: [] };
+  }
+}
+
