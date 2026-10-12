@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/schemas/auth.schema';
@@ -9,11 +9,54 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from 'cn';
-import { AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, Loader2, Eye, EyeOff, Users, ChevronDown } from 'lucide-react';
+
+const QUICK_USERS = [
+	{ usuario: 'admin', nombre: 'Admin' },
+	{ usuario: 'solicitante', nombre: 'Juan Perez' },
+	{ usuario: 'solicitante_ti', nombre: 'Ana Gomez' },
+	{ usuario: 'aprobador', nombre: 'María' },
+	{ usuario: 'compras', nombre: 'Carlos' },
+	{ usuario: 'inactivo', nombre: 'Pedro (Inactivo)' },
+];
 
 export function LoginForm() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [loadingQuickUser, setLoadingQuickUser] = useState<string | null>(null);
+	const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false);
+	const quickMenuRef = useRef<HTMLDivElement>(null);
+
+	// Cerrar menú al hacer clic fuera
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			if (
+				quickMenuRef.current &&
+				!quickMenuRef.current.contains(e.target as Node)
+			) {
+				setIsQuickMenuOpen(false);
+			}
+		};
+
+		if (isQuickMenuOpen) {
+			document.addEventListener('mousedown', handleClickOutside);
+		}
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [isQuickMenuOpen]);
+
+	// Cerrar menú con tecla Escape
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && isQuickMenuOpen) {
+				setIsQuickMenuOpen(false);
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+		return () => window.removeEventListener('keydown', handleKeyDown);
+	}, [isQuickMenuOpen]);
 
 	const {
 		register,
@@ -48,12 +91,31 @@ export function LoginForm() {
 		}
 	};
 
-	const fillQuickUser = (user: string) => {
+	const fillQuickUser = async (user: string) => {
+		if (isSubmitting || loadingQuickUser) return;
 		setValue('usuario', user, { shouldValidate: true });
 		setValue('password', 'password123', { shouldValidate: true });
 		clearErrors();
 		setError(null);
+		setLoadingQuickUser(user);
+
+		try {
+			const formData = new FormData();
+			formData.append('usuario', user);
+			formData.append('password', 'password123');
+
+			const res = await loginAction(formData);
+			if (res && !res.success) {
+				setError(res.error || 'Ocurrió un error al ingresar');
+			}
+		} catch {
+			// Next.js redirection trigger en Server Action
+		} finally {
+			setLoadingQuickUser(null);
+		}
 	};
+
+	const isProcessing = isSubmitting || !!loadingQuickUser;
 
 	return (
 		<div className="w-full lg:w-1/2 flex flex-col justify-between items-center px-6 py-8 sm:px-12 lg:px-14 xl:px-18 lg:h-full overflow-y-auto">
@@ -98,7 +160,7 @@ export function LoginForm() {
 								type="text"
 								autoComplete="username"
 								placeholder="ej. jperez o jperez@adaptapro.com"
-								disabled={isSubmitting}
+								disabled={isProcessing}
 								aria-invalid={!!errors.usuario}
 								{...register('usuario')}
 								className={cn(errors.usuario && 'pr-10')}
@@ -129,7 +191,7 @@ export function LoginForm() {
 								type={showPassword ? 'text' : 'password'}
 								autoComplete="current-password"
 								placeholder="Ingresa tu contraseña"
-								disabled={isSubmitting}
+								disabled={isProcessing}
 								aria-invalid={!!errors.password}
 								{...register('password')}
 								className={cn('pr-10', errors.password && 'pr-16')}
@@ -166,9 +228,9 @@ export function LoginForm() {
 						type="submit"
 						size="lg"
 						className="w-full mt-2"
-						disabled={isSubmitting}
+						disabled={isProcessing}
 					>
-						{isSubmitting ? (
+						{isProcessing ? (
 							<>
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 								Ingresando...
@@ -179,57 +241,67 @@ export function LoginForm() {
 					</Button>
 				</form>
 
-				{/* Acceso Rápido de Prueba (Demo) */}
-				<div className="pt-1">
+				{/* Acceso Rápido de Prueba (Popup) */}
+				<div className="relative pt-1" ref={quickMenuRef}>
 					<div className="relative my-4 xl:my-5">
 						<div className="absolute inset-0 flex items-center">
 							<span className="w-full border-t border-slate-200 dark:border-zinc-800" />
 						</div>
 						<div className="relative flex justify-center text-[11px] uppercase">
 							<span className="bg-[#faf9f5] dark:bg-[#121214] px-3 text-slate-400 font-medium tracking-wider">
-								Acceso Rápido de Prueba
+								Acceso Rápido
 							</span>
 						</div>
 					</div>
 
-					<div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							className="h-7.5 sm:h-8 rounded-md text-xs font-medium border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-300"
-							onClick={() => fillQuickUser('solicitante')}
-						>
-							Solicitante
-						</Button>
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							className="h-7.5 sm:h-8 rounded-md text-xs font-medium border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-300"
-							onClick={() => fillQuickUser('aprobador')}
-						>
-							Aprobador
-						</Button>
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							className="h-7.5 sm:h-8 rounded-md text-xs font-medium border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-300"
-							onClick={() => fillQuickUser('compras')}
-						>
-							Compras
-						</Button>
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							className="h-7.5 sm:h-8 rounded-md text-xs font-medium border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-300"
-							onClick={() => fillQuickUser('admin')}
-						>
-							Admin
-						</Button>
-					</div>
+					{/* Botón único para abrir popup */}
+					<button
+						type="button"
+						disabled={isProcessing}
+						onClick={() => setIsQuickMenuOpen(!isQuickMenuOpen)}
+						className="w-full h-9 px-3 rounded-md border border-slate-200 dark:border-zinc-800 hover:border-[#035786]/50 dark:hover:border-sky-500/50 hover:bg-slate-50 dark:hover:bg-zinc-800/60 bg-white dark:bg-zinc-900 transition-all text-xs font-medium text-slate-700 dark:text-zinc-200 flex items-center justify-between cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+					>
+						<span className="flex items-center gap-2">
+							<Users className="w-3.5 h-3.5 text-slate-400" />
+							<span>
+								{loadingQuickUser
+									? `Ingresando como ${QUICK_USERS.find((u) => u.usuario === loadingQuickUser)?.nombre}...`
+									: 'Seleccionar usuario de prueba'}
+							</span>
+						</span>
+						{loadingQuickUser ? (
+							<Loader2 className="w-3.5 h-3.5 animate-spin text-[#035786] dark:text-sky-400 shrink-0" />
+						) : (
+							<ChevronDown
+								className={cn(
+									'w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0',
+									isQuickMenuOpen && 'rotate-180',
+								)}
+							/>
+						)}
+					</button>
+
+					{/* Menú Popup con la lista sencilla de usuarios */}
+					{isQuickMenuOpen && (
+						<div className="absolute left-0 right-0 bottom-full mb-1.5 sm:bottom-auto sm:top-full sm:mt-1.5 z-30 bg-white dark:bg-[#18181b] border border-slate-200 dark:border-zinc-800 rounded-md shadow-lg p-1 animate-in fade-in-50 zoom-in-95 duration-150">
+							<div className="space-y-0.5">
+								{QUICK_USERS.map((qu) => (
+									<button
+										key={qu.usuario}
+										type="button"
+										disabled={isProcessing}
+										onClick={() => {
+											setIsQuickMenuOpen(false);
+											fillQuickUser(qu.usuario);
+										}}
+										className="w-full px-3 py-2 text-xs font-medium rounded text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 hover:text-[#035786] dark:hover:text-sky-400 transition-colors text-left flex items-center justify-between cursor-pointer"
+									>
+										<span>{qu.nombre}</span>
+									</button>
+								))}
+							</div>
+						</div>
+					)}
 
 					<p className="text-[11px] text-slate-400 text-center mt-2.5">
 						Clave predeterminada:{' '}
